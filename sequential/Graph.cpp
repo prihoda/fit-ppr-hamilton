@@ -17,9 +17,10 @@ Graph::~Graph() {
         delete[] adjacent[i];
     }
     delete[] adjacent;
-    delete[] discovered;
+    delete[] prev;
 }
 
+// write graph matrix to output
 ostream &operator<<( ostream &output, const Graph &G )
 {
 
@@ -33,11 +34,12 @@ ostream &operator<<( ostream &output, const Graph &G )
     return output;
 }
 
+// read the graph from input
 istream &operator>>( istream  &input, Graph &G )
 {
     input >> G.size;
     G.adjacent = new bool*[G.size];
-    G.discovered = new bool[G.size];
+    G.prev = new int[G.size];
     for(int i=0; i<G.size; i++){
         char ch;
         G.adjacent[i] = new bool[G.size];
@@ -51,6 +53,27 @@ istream &operator>>( istream  &input, Graph &G )
 
 void Graph::reset() {
     for(int i=0; i<size; i++){
-        discovered[i] = false;
+        prev[i] = -1;
     }
+}
+
+// find nodeToFind backtracking from nodeAtEnd
+bool Graph::isOnPath(int nodeAtEnd, int nodeToFind) {
+    int current = nodeAtEnd;
+    while (current != -1) {
+        if (current == nodeToFind)
+            return true;
+        current = prev[current];
+    }
+    return false;
+}
+
+// print path backwards starting at nodeAtEnd
+void Graph::printPath(int nodeAtEnd) {
+    int current = nodeAtEnd;
+    while (current != -1) {
+        cout << current << " ";
+        current = prev[current];
+    }
+    cout << endl;
 }

@@ -11,7 +11,7 @@ using namespace std;
 class Graph {
 public:
     bool** adjacent;
-    bool*discovered;
+    int*prev;
     int size;
 
     ~Graph();
@@ -20,6 +20,10 @@ public:
     friend istream &operator>>( istream  &input, Graph &G );
 
     Graph();
+
+    bool isOnPath(int i, int i1);
+
+    void printPath(int nodeAtEnd);
 };
 
 #endif //PPR_SEQUENTIAL_GRAPH_H

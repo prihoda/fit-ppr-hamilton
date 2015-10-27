@@ -9,15 +9,27 @@
 #include <stack>
 #include "Graph.h"
 
-class MaxHamilton {
-protected:
-    stack<int> s;
-    Graph* g;
-public:
-    MaxHamilton(Graph* graph);
-    void max();
-    void visit(int node);
+struct edge {
+    int from;
+    int to;
 };
 
+
+class MaxHamilton {
+protected:
+    stack<edge> s;
+    Graph* g;
+    int root;
+    stack<int> bestPath;
+    int bestLength;
+
+public:
+
+    MaxHamilton(Graph* graph);
+    ~MaxHamilton();
+    void max();
+    void visit(edge current);
+    void setBestPath(int nodeAtEnd);
+};
 
 #endif //PPR_SEQUENTIAL_HAMILTON_H
