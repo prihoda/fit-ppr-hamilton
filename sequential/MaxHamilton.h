@@ -20,6 +20,7 @@ protected:
     stack<edge> s;
     Graph* g;
     int root;
+    int numOperations;
     stack<int> bestPath;
     int bestLength;
     void maxFromRoot(int fromRoot);

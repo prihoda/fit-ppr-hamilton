@@ -8,6 +8,8 @@ using namespace std;
 
 void MaxHamilton::max() {
 
+    numOperations = 0;
+
     // remove old best path
     bestLength = 0;
     while (!bestPath.empty())
@@ -19,6 +21,8 @@ void MaxHamilton::max() {
     }
 
     // done, print the longest circle
+    cout << "-----------------------------" << endl;
+    cout << "Number of stack pops: " << numOperations << endl;
     cout << "-----------------------------" << endl;
     cout << "Longest hamiltonian subgraph: " << endl;
 
@@ -52,6 +56,7 @@ void MaxHamilton::maxFromRoot(int fromRoot) {
         edge current = s.top();
         s.pop();
         visit(current);
+        numOperations++;
     }
 
 }
