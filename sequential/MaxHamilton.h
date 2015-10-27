@@ -22,14 +22,15 @@ protected:
     int root;
     stack<int> bestPath;
     int bestLength;
+    void maxFromRoot(int fromRoot);
+    void visit(edge current);
+    void setBestPath(int nodeAtEnd);
 
 public:
 
     MaxHamilton(Graph* graph);
     ~MaxHamilton();
     void max();
-    void visit(edge current);
-    void setBestPath(int nodeAtEnd);
 };
 
 #endif //PPR_SEQUENTIAL_HAMILTON_H

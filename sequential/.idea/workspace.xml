@@ -12,13 +12,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c59147de-8832-4bbe-98aa-f83524f58443" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Graph.cpp" afterPath="$PROJECT_DIR$/Graph.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Graph.h" afterPath="$PROJECT_DIR$/Graph.h" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MaxHamilton.cpp" afterPath="$PROJECT_DIR$/MaxHamilton.cpp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/MaxHamilton.h" afterPath="$PROJECT_DIR$/MaxHamilton.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data/graf.txt" afterPath="$PROJECT_DIR$/data/graf.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="sequential.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -61,21 +56,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="graf.txt" pinned="false" current-in-tab="true">
+      <file leaf-file-name="graf.txt" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/data/graf.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.60335195">
-              <caret line="12" column="7" selection-start-line="12" selection-start-column="7" selection-end-line="12" selection-end-column="7" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="15" selection-end-column="7" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="MaxHamilton.cpp" pinned="false" current-in-tab="false">
+      <file leaf-file-name="MaxHamilton.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/MaxHamilton.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="51" column="47" selection-start-line="51" selection-start-column="47" selection-end-line="51" selection-end-column="47" />
+            <state vertical-scroll-proportion="0.5027933">
+              <caret line="10" column="27" selection-start-line="10" selection-start-column="27" selection-end-line="10" selection-end-column="27" />
               <folding />
             </state>
           </provider>
@@ -85,7 +80,7 @@
         <entry file="file://$PROJECT_DIR$/MaxHamilton.h">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="5" column="33" selection-start-line="5" selection-start-column="33" selection-end-line="5" selection-end-column="33" />
+              <caret line="24" column="33" selection-start-line="24" selection-start-column="33" selection-end-line="24" selection-end-column="33" />
               <folding>
                 <element signature="e#110#126#0" expanded="true" />
               </folding>
@@ -128,8 +123,8 @@
         <option value="$PROJECT_DIR$/main.cpp" />
         <option value="$PROJECT_DIR$/Graph.h" />
         <option value="$PROJECT_DIR$/data/graf.txt" />
-        <option value="$PROJECT_DIR$/MaxHamilton.h" />
         <option value="$PROJECT_DIR$/Graph.cpp" />
+        <option value="$PROJECT_DIR$/MaxHamilton.h" />
         <option value="$PROJECT_DIR$/MaxHamilton.cpp" />
       </list>
     </option>
@@ -545,24 +540,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/MaxHamilton.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="5" column="33" selection-start-line="5" selection-start-column="33" selection-end-line="5" selection-end-column="33" />
-          <folding>
-            <element signature="e#110#126#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/MaxHamilton.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="51" column="47" selection-start-line="51" selection-start-column="47" selection-end-line="51" selection-end-column="47" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -573,10 +550,28 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/MaxHamilton.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="24" column="33" selection-start-line="24" selection-start-column="33" selection-end-line="24" selection-end-column="33" />
+          <folding>
+            <element signature="e#110#126#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/data/graf.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.60335195">
-          <caret line="12" column="7" selection-start-line="12" selection-start-column="7" selection-end-line="12" selection-end-column="7" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="15" selection-end-column="7" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/MaxHamilton.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.5027933">
+          <caret line="10" column="27" selection-start-line="10" selection-start-column="27" selection-end-line="10" selection-end-column="27" />
           <folding />
         </state>
       </provider>

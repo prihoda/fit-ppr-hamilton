@@ -8,14 +8,35 @@ using namespace std;
 
 void MaxHamilton::max() {
 
-    // reset graph variables
-    g->reset();
-
     // remove old best path
     bestLength = 0;
     while (!bestPath.empty())
         bestPath.pop();
-    root = 0;
+
+    // start at each node
+    for(int i=0; i<g->size; i++) {
+        maxFromRoot(i);
+    }
+
+    // done, print the longest circle
+    cout << "-----------------------------" << endl;
+    cout << "Longest hamiltonian subgraph: " << endl;
+
+    if (bestPath.empty())
+        cout << "Not found.";
+
+    while (!bestPath.empty()) {
+        cout << bestPath.top() << " ";
+        bestPath.pop();
+    }
+    cout << endl;
+}
+
+void MaxHamilton::maxFromRoot(int fromRoot) {
+    // reset graph variables
+    g->reset();
+
+    root = fromRoot;
 
     // prepare first edge (beginning is marked with -1)
     edge rootEdge;
@@ -33,17 +54,6 @@ void MaxHamilton::max() {
         visit(current);
     }
 
-    // done, print the longest circle
-    cout << "-----------------------------" << endl;
-    cout << "Longest hamiltonian subgraph: " << endl;
-
-    if (bestPath.empty())
-        cout << "Not found.";
-
-    while (!bestPath.empty()) {
-        cout << bestPath.top() << " ";
-        bestPath.pop();
-    }
 }
 
 void MaxHamilton::visit(edge currentEdge) {
