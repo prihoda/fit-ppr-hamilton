@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     int result = MPI_Recv(&value, 1, MPI_INT, 0, 0, MPI_COMM_WORLD,
 			  MPI_STATUS_IGNORE);
     if (result == MPI_SUCCESS && value == 17)
-      std::cout << "Rank 1 OK!" << std::endl;
+      std::cout << "Rank 1 also OK!" << std::endl;
   }
   MPI_Finalize();
   return 0;
