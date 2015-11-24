@@ -31,8 +31,10 @@ void MaxHamilton::max() {
         bestPath.pop();
 
     // start at each node
+    cout << "Process no. " << rank << " starting from nodes {";
     for(int i=rank; i<g->size; i+=numProcessors) {
         if (neighbours(i) > 1){//(!foundLimit) && (
+            cout << i << " ";
 	// prepare first edge (beginning is marked with -1)
 	    edge rootEdge;
 	    rootEdge.from = -1;
@@ -40,6 +42,7 @@ void MaxHamilton::max() {
             s.push_front(rootEdge);
         }
     }
+    cout << "}" << endl;
 
     // push root edge to stack and start
     //s.push(rootEdge);
@@ -68,10 +71,10 @@ void MaxHamilton::max() {
     }
 
     // done, print the longest circle
-    cout << "-----------------------------" << endl;
-    cout << "Number of stack pops: " << numOperations << endl;
-    cout << "-----------------------------" << endl;
-    cout << "Longest hamiltonian subgraph: " << endl;
+    //cout << "-----------------------------" << endl;
+    //cout << "Number of stack pops: " << numOperations << endl;
+    //cout << "-----------------------------" << endl;
+    cout << "Process no. " << rank << " finished: Longest hamiltonian subgraph: " << endl;
 
     if (bestPath.empty())
         cout << "Not found.";

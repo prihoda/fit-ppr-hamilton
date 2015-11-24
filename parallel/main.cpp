@@ -19,9 +19,9 @@ int main(int argc, char *argv[]) {
       ifstream file;
       file.open("../parallel/data/graf.txt", ios::in);
       Graph* graph = new Graph();
-      cout << "Input graph: " << endl;
+      //cout << "Input graph: " << endl;
       file >> *graph;
-      cout << "Graph: " << endl << *graph << endl;
+      //cout << "Graph: " << endl << *graph << endl;
        clock_t start, end;
       start = clock();
 
