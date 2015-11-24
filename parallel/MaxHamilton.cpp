@@ -6,9 +6,24 @@
 
 using namespace std;
 
+int MaxHamilton::neighbours(int m)
+{
+    int n =0;
+    for (int i=0; i<g->size; i++)
+    {
+        if (g->adjacent[m][i])
+        {
+            n++;
+        }
+    }
+    return n;
+}
+
+
 void MaxHamilton::max() {
 
     numOperations = 0;
+    foundLimit = false;
 
     // remove old best path
     bestLength = 0;
@@ -17,7 +32,9 @@ void MaxHamilton::max() {
 
     // start at each node
     for(int i=0; i<g->size; i++) {
-        maxFromRoot(i);
+        if ((!foundLimit) && (neighbours(i) > 1)){
+            maxFromRoot(i);
+        }
     }
 
     // done, print the longest circle
@@ -49,7 +66,7 @@ void MaxHamilton::maxFromRoot(int fromRoot) {
 
     // push root edge to stack and start
     s.push(rootEdge);
-    cout << "Starting at " << root << endl;
+    //cout << "Starting at " << root << endl;
 
     // keep removing edges from stack
     while (!s.empty()) {
@@ -66,26 +83,26 @@ void MaxHamilton::visit(edge currentEdge) {
     // update the current path (just connect the current edge to the existing path)
     g->prev[currentEdge.to] = currentEdge.from;
 
-    cout << " Visiting " << currentEdge.from << "->" << currentEdge.to;
-    cout << ", path: ";
-    g->printPath(currentEdge.to);
+    //cout << " Visiting " << currentEdge.from << "->" << currentEdge.to;
+    //cout << ", path: ";
+    //g->printPath(currentEdge.to);
 
     // loop through all neighbors
     for (int next = g->size - 1; next >= 0; next--) {
         if (!g->adjacent[currentEdge.to][next]) continue;
-        cout << "   Opening " << next << ": ";
+        //cout << "   Opening " << next << ": ";
 
         // came back to root in more than two steps
         if (next == root && g->prev[currentEdge.to] != root) {
-            cout << "Found cycle: ";
-            g->printPath(currentEdge.to);
+            //cout << "Found cycle: ";
+            //g->printPath(currentEdge.to);
             setBestPath(currentEdge.to);
             continue;
         }
 
         // an already visited neighbor
         if (g->isOnPath(currentEdge.to, next)) {
-            cout << "Already visited " << endl;
+            //cout << "Already visited " << endl;
             continue;
         }
 
@@ -93,7 +110,7 @@ void MaxHamilton::visit(edge currentEdge) {
         edge nextEdge;
         nextEdge.from = currentEdge.to;
         nextEdge.to = next;
-        cout << "Adding " << nextEdge.from << "->" << nextEdge.to << endl;
+        //cout << "Adding " << nextEdge.from << "->" << nextEdge.to << endl;
         s.push(nextEdge);
     }
 }
@@ -123,6 +140,12 @@ void MaxHamilton::setBestPath(int nodeAtEnd) {
         bestPath.push(current);
         current = g->prev[current];
     }
+
+    if (bestLength == g->size)
+    {
+        foundLimit = true;
+    }
+
     cout << endl;
 }
 
