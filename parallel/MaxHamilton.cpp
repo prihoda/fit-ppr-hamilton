@@ -106,7 +106,6 @@ void MaxHamilton::waitForWork(){
     
 }
 void MaxHamilton::checkMessage(MPI_Status status){
-{
       //prisla zprava, je treba ji obslouzit
       //v promenne status je tag (status.MPI_TAG), cislo odesilatele (status.MPI_SOURCE)
       //a pripadne cislo chyby (status.MPI_ERROR)

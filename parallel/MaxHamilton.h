@@ -13,6 +13,7 @@
 #define MSG_TOKEN        1003
 #define MSG_FINISH       1004
 
+#include <cstdlib>
 #include <deque>
 #include <stack>
 #include <mpi.h>
