@@ -42,7 +42,7 @@ protected:
     void visit(edge current);
     work* getSharableWork();
     void setBestPath(int nodeAtEnd);
-    void checkMessage();
+    void checkMessage(MPI_Status status);
     void waitForWork();
     int neighbours(int m);
 
