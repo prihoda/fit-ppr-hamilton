@@ -10,7 +10,7 @@ using namespace std;
 
 int main() {
     ifstream file;
-    file.open("input.txt", ios::in);
+    file.open("data/graf.txt", ios::in);
     Graph* graph = new Graph();
     cout << "Input graph: " << endl;
     file >> *graph;
