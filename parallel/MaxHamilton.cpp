@@ -134,7 +134,10 @@ work* MaxHamilton::getSharableWork(){
    if(s.back().from == -1){
       edge rootEdge = s.back();
       s.pop_back();
-      return rootEdge;
+      work work;
+      work.root = rootEdge;
+      
+      return work;
    }
    
    return NULL;
