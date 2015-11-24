@@ -28,13 +28,43 @@ void MaxHamilton::max() {
     // remove old best path
     bestLength = 0;
     while (!bestPath.empty())
-        bestPath.pop();
+        bestPath.pop_front();
 
     // start at each node
-    for(int i=0; i<g->size; i++) {
-        if ((!foundLimit) && (neighbours(i) > 1)){
-            maxFromRoot(i);
+    for(int i=rank; i<g->size; i+=numProcessors) {
+        if (neighbours(i) > 1){//(!foundLimit) && (
+	// prepare first edge (beginning is marked with -1)
+	    edge rootEdge;
+	    rootEdge.from = -1;
+	    rootEdge.to = i;
+            s.push_front(rootEdge);
         }
+    }
+
+    // push root edge to stack and start
+    //s.push(rootEdge);
+    //cout << "Starting at " << root << endl;
+
+    // keep removing edges from stack
+    while (!s.empty()) {
+        edge current = s.front();
+        s.pop_front();
+        if(current.from == -1){
+            // reset graph variables
+            g->reset();
+            root = current.to;
+        }
+        if ((numOperations % CHECK_MSG_AMOUNT)==0){
+	   int flag;
+	   MPI_Status status;
+	   MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+	   if (flag){
+              checkMessage(status);
+	   }
+	}
+
+        visit(current);
+        numOperations++;
     }
 
     // done, print the longest circle
@@ -52,32 +82,63 @@ void MaxHamilton::max() {
     }
     cout << endl;
 }
-
-void MaxHamilton::maxFromRoot(int fromRoot) {
-    // reset graph variables
-    g->reset();
-
-    root = fromRoot;
-
-    // prepare first edge (beginning is marked with -1)
-    edge rootEdge;
-    rootEdge.from = -1;
-    rootEdge.to = root;
-
-    // push root edge to stack and start
-    s.push(rootEdge);
-    //cout << "Starting at " << root << endl;
-
-    // keep removing edges from stack
-    while (!s.empty()) {
-        edge current = s.top();
-        s.pop();
-        visit(current);
-        numOperations++;
+void MaxHamilton::waitForWork(){
+    int flag;
+    MPI_Status status;
+    MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+    if (flag)
+    {
+      //prisla zprava, je treba ji obslouzit
+      //v promenne status je tag (status.MPI_TAG), cislo odesilatele (status.MPI_SOURCE)
+      //a pripadne cislo chyby (status.MPI_ERROR)
+      switch (status.MPI_TAG)
+      {
+         case MSG_WORK_SENT : // prisel rozdeleny zasobnik, prijmout
+                              // deserializovat a spustit vypocet
+                              break;
+         case MSG_WORK_NOWORK : // odmitnuti zadosti o praci
+                                // zkusit jiny proces
+                                // a nebo se prepnout do pasivniho stavu a cekat na token
+                                break
+         default : chyba("neznamy typ zpravy"); break;
+      }
+      checkMessage(status);
     }
-
+    
 }
-
+void MaxHamilton::checkMessage(MPI_Status status){
+{
+      //prisla zprava, je treba ji obslouzit
+      //v promenne status je tag (status.MPI_TAG), cislo odesilatele (status.MPI_SOURCE)
+      //a pripadne cislo chyby (status.MPI_ERROR)
+      switch (status.MPI_TAG)
+      {
+         case MSG_WORK_REQUEST : // zadost o praci, prijmout a dopovedet
+                                 // zaslat rozdeleny zasobnik a nebo odmitnuti MSG_WORK_NOWORK
+                                 break;
+         case MSG_TOKEN : //ukoncovaci token, prijmout a nasledne preposlat
+                          // - bily nebo cerny v zavislosti na stavu procesu
+                          break;
+         case MSG_FINISH : //konec vypoctu - proces 0 pomoci tokenu zjistil, ze jiz nikdo nema praci
+                           //a rozeslal zpravu ukoncujici vypocet
+                           //mam-li reseni, odeslu procesu 0
+                           //nasledne ukoncim spoji cinnost
+                           //jestlize se meri cas, nezapomen zavolat koncovou barieru MPI_Barrier (MPI_COMM_WORLD)
+                           MPI_Finalize();
+                           exit (0);
+                           break;
+         default : chyba("neznamy typ zpravy"); break;
+      }
+}
+work* MaxHamilton::getSharableWork(){
+   if(s.back().from == -1){
+      edge rootEdge = s.back();
+      s.pop_back();
+      return rootEdge;
+   }
+   
+   return NULL;
+}
 void MaxHamilton::visit(edge currentEdge) {
 
     // update the current path (just connect the current edge to the existing path)
@@ -149,8 +210,10 @@ void MaxHamilton::setBestPath(int nodeAtEnd) {
     cout << endl;
 }
 
-MaxHamilton::MaxHamilton(Graph *graph) {
+MaxHamilton::MaxHamilton(Graph *graph, int numProcessors, int rank) {
     g = graph;
+    this.numProcessors = numProcessors;
+    this.rank = rank;
 }
 
 
