@@ -134,10 +134,10 @@ work* MaxHamilton::getSharableWork(){
    if(s.back().from == -1){
       edge rootEdge = s.back();
       s.pop_back();
-      work* work = new work;
-      work->root = rootEdge;
+      work* workUnit = new work;
+      workUnit->root = rootEdge;
       
-      return work;
+      return workUnit;
    }
    
    return NULL;
@@ -175,7 +175,7 @@ void MaxHamilton::visit(edge currentEdge) {
         nextEdge.from = currentEdge.to;
         nextEdge.to = next;
         //cout << "Adding " << nextEdge.from << "->" << nextEdge.to << endl;
-        s.push(nextEdge);
+        s.push_front(nextEdge);
     }
 }
 
@@ -215,8 +215,8 @@ void MaxHamilton::setBestPath(int nodeAtEnd) {
 
 MaxHamilton::MaxHamilton(Graph *graph, int numProcessors, int rank) {
     g = graph;
-    this.numProcessors = numProcessors;
-    this.rank = rank;
+    this->numProcessors = numProcessors;
+    this->rank = rank;
 }
 
 
