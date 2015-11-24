@@ -14,6 +14,7 @@
 #define MSG_FINISH       1004
 
 #include <deque>
+#include <stack>
 #include "Graph.h"
 
 struct edge {
