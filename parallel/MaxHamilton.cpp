@@ -99,8 +99,7 @@ void MaxHamilton::waitForWork(){
          case MSG_WORK_NOWORK : // odmitnuti zadosti o praci
                                 // zkusit jiny proces
                                 // a nebo se prepnout do pasivniho stavu a cekat na token
-                                break
-         default : chyba("neznamy typ zpravy"); break;
+                                break;
       }
       checkMessage(status);
     }
@@ -116,6 +115,8 @@ void MaxHamilton::checkMessage(MPI_Status status){
          case MSG_WORK_REQUEST : // zadost o praci, prijmout a dopovedet
                                  // zaslat rozdeleny zasobnik a nebo odmitnuti MSG_WORK_NOWORK
                                  break;
+         case MSG_WORK_SENT : break;
+         case MSG_WORK_NOWORK : break;
          case MSG_TOKEN : //ukoncovaci token, prijmout a nasledne preposlat
                           // - bily nebo cerny v zavislosti na stavu procesu
                           break;
@@ -127,7 +128,7 @@ void MaxHamilton::checkMessage(MPI_Status status){
                            MPI_Finalize();
                            exit (0);
                            break;
-         default : chyba("neznamy typ zpravy"); break;
+         default : std::cout << "neznamy typ zpravy"; break;
       }
 }
 work* MaxHamilton::getSharableWork(){
