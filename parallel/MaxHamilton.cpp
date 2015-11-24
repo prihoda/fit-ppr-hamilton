@@ -31,7 +31,7 @@ void MaxHamilton::max() {
         bestPath.pop();
 
     // start at each node
-    cout << "Process no. " << rank << " starting from nodes {";
+    cout << "Process no. " << rank << " starting from nodes { ";
     for(int i=rank; i<g->size; i+=numProcessors) {
         if (neighbours(i) > 1){//(!foundLimit) && (
             cout << i << " ";
