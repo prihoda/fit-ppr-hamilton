@@ -23,9 +23,12 @@ protected:
     int numOperations;
     stack<int> bestPath;
     int bestLength;
+    bool foundLimit;
     void maxFromRoot(int fromRoot);
     void visit(edge current);
     void setBestPath(int nodeAtEnd);
+
+    int neighbours(int m);
 
 public:
 
