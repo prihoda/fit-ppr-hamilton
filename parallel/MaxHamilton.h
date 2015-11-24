@@ -15,6 +15,7 @@
 
 #include <deque>
 #include <stack>
+#include <mpi.h>
 #include "Graph.h"
 
 struct edge {

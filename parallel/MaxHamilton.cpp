@@ -28,7 +28,7 @@ void MaxHamilton::max() {
     // remove old best path
     bestLength = 0;
     while (!bestPath.empty())
-        bestPath.pop_front();
+        bestPath.pop();
 
     // start at each node
     for(int i=rank; i<g->size; i+=numProcessors) {
