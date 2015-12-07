@@ -252,7 +252,8 @@ void MaxHamilton::checkMessage(MPI_Status status){
 		                         if (w == NULL)
 		                         {
 	cout << "Process " << rank << " sending no work message to " << status.MPI_SOURCE << endl;
-		                            MPI_Isend (' ', ' ', MPI_INT, status.MPI_SOURCE , MSG_WORK_SENT, MPI_COMM_WORLD, &request);
+					    int zero = 0;
+ 		                            MPI_Isend (&zero, 1, MPI_INT, status.MPI_SOURCE , MSG_WORK_SENT, MPI_COMM_WORLD, &request);
 		                         }
 		                         else
 		                         {
