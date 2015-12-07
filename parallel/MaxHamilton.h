@@ -24,7 +24,8 @@ struct edge {
     int to;
 };
 struct work {
-    edge root;
+    int stackSize;
+    edge* stack;
     int*prev;
 };
 

@@ -184,27 +184,40 @@ void MaxHamilton::waitForWork(){
     MPI_Send (NULL, 0, MPI_CHAR, askForWork, MSG_WORK_REQUEST, MPI_COMM_WORLD);
     int w = -1;
     MPI_Status status;
-    int workSize [2];
+    int stackSize = 0;
     do {
     	int flag;
 	    MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
 	    if (flag){
                 if(status.MPI_TAG == MSG_WORK_SIZE) {
-    			MPI_Recv(workSize, 2, MPI_INT, status.MPI_SOURCE, MSG_WORK_SIZE, MPI_COMM_WORLD, &status);
+    			MPI_Recv(&stackSize, 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SIZE, MPI_COMM_WORLD, &status);
 			continue;
 		}
                 if(status.MPI_TAG == MSG_WORK_SENT) break;
 		checkMessage(status);
 	    }
     } while(true);
+    
 
-    MPI_Recv(&w, 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
-
-    if(w == -1) {
+    if(stackSize == 0) {
+        MPI_Recv(&w, 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
 	cout << "Processor " << rank << " received no work from " << askForWork << endl;
         askForWork = (askForWork + 1) % numProcessors;
     } else { 
-	cout << "Processor " << rank << " received work '" << w <<"' from " << askForWork << endl;
+	int structSize = stackSize + g->size;
+	int * stack = new int[stackSize];
+	int * workStruct = new int[structSize];
+  	int position=0;
+        MPI_Recv(&w, stackSize, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
+        MPI_Unpack(workStruct, LENGTH, &position, stack, 1, MPI_FLOAT, MPI_COMM_WORLD);
+        MPI_Unpack(workStruct, LENGTH, &position, g->prev, 1, MPI_INT, MPI_COMM_WORLD);
+	delete [] workStruct;
+        s.clear();
+	for(int i=0; i<stackSize; i++){
+	    s.push_front(stack[i]);       
+	}
+	delete [] stack;
+	cout << "Processor " << rank << " received work from " << askForWork << endl;
     }
 
 }
@@ -222,17 +235,24 @@ void MaxHamilton::checkMessage(MPI_Status status){
 		                         // zaslat rozdeleny zasobnik a nebo odmitnuti MSG_WORK_NOWORK
 					MPI_Request request;
 		                         work* w = getSharableWork();
+					 
 		                         if (w == NULL)
 		                         {
 	cout << "Process " << rank << " sending no work message to " << status.MPI_SOURCE << endl;
-                                             
 		                            MPI_Isend (NULL, 0, MPI_INT, status.MPI_SOURCE , MSG_WORK_SENT, MPI_COMM_WORLD, &request);
 		                         }
 		                         else
 		                         {
-	cout << "Process " << rank << " sending work to " << status.MPI_SOURCE << endl;
-					    int msg = 5;
-		                            MPI_Isend (&msg, 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &request);
+						cout << "Process " << rank << " sending work to " << status.MPI_SOURCE << endl;
+					
+					    int structSize = w->stackSize + g->size;
+					    int * workStruct = new int[structSize];
+  				            int position=0;
+					    MPI_Pack(w->stack, w->stackSize, MPI_INT, workStruct, structSize, &position, MPI_COMM_WORLD);
+					    MPI_Pack(w->prev, g->size, MPI_INT, workStruct, structSize, &position, MPI_COMM_WORLD);
+		                            MPI_Isend (&(w->stackSize), 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SIZE, MPI_COMM_WORLD, &request);
+		                            MPI_Isend (workStruct, structSize, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &request);
+					    delete [] workStruct;
 					    color = 'B';
 		                         }
                                  }
@@ -280,7 +300,9 @@ work* MaxHamilton::getSharableWork(){
       edge rootEdge = s.back();
       s.pop_back();
       work* workUnit = new work;
-      workUnit->root = rootEdge;
+      workUnit->stackSize = 1;
+      workUnit->stack = new int[1];
+      workUnit->stack[0] = rootEdge;
 
       return workUnit;
    }
