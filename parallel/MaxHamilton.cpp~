@@ -322,7 +322,7 @@ break;
 }
 
 work* MaxHamilton::getSharableWork(){
-   if(s.back().from == -1){
+   if(!s.empty() && s.back().from == -1){
       work* workUnit = new work;
       int toShare = 1;//s.size()/2;
       workUnit->stackSize = toShare*2;
