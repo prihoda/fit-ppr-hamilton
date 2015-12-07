@@ -143,15 +143,14 @@ void MaxHamilton::max() {
 }
 void MaxHamilton::waitForWork(){
     int flag;
-    MPI_Status status;
     cout << "Processor " << rank << " asking " << askForWork << " for work" << endl;
     MPI_Send (NULL, 0, MPI_CHAR, askForWork, MSG_WORK_REQUEST, MPI_COMM_WORLD);
     int w;
-    MPI_Recv(&w, 1, MPI_INT, status.MPI_SOURCE, MSG_TOKEN, MPI_COMM_WORLD, &status);
-    while (status.MPI_TAG != MSG_WORK_SENT && status.MPI_TAG !=MSG_WORK_NOWORK){
+    MPI_Status status;
+    do {
+      MPI_Recv(&w, 1, MPI_INT, askForWork, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
       checkMessage(status);
-      if(status.MPI_TAG == MSG_FINISH) return;
-    }
+    } while(status.MPI_TAG != MSG_WORK_SENT && status.MPI_TAG !=MSG_WORK_NOWORK && !isFinished);
     //MPI_Status status;
     //MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
     //if (flag)
