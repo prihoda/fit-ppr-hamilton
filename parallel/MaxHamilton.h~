@@ -45,6 +45,7 @@ protected:
     void setBestPath(int nodeAtEnd);
     void checkMessage(MPI_Status status);
     void waitForWork();
+    void bestPathToArray(int * buffer);
     int neighbours(int m);
     int askForWork;
     char color;

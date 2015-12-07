@@ -9,7 +9,7 @@
 
 #define MSG_WORK_REQUEST 1000
 #define MSG_WORK_SENT    1001
-#define MSG_WORK_NOWORK  1002
+#define MSG_WORK_SIZE    1002
 #define MSG_TOKEN        1003
 #define MSG_FINISH       1004
 
