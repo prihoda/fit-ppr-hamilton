@@ -145,17 +145,17 @@ void MaxHamilton::waitForWork(){
     int flag;
     cout << "Processor " << rank << " asking " << askForWork << " for work" << endl;
     MPI_Send (NULL, 0, MPI_CHAR, askForWork, MSG_WORK_REQUEST, MPI_COMM_WORLD);
-    int *w = new int(111);
+    int w = -1;
     MPI_Status status;
     //do {
-    MPI_Recv(w, 1, MPI_INT, askForWork, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
+    MPI_Recv(&w, 1, MPI_INT, askForWork, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
     
-    if(w == NULL) {
+    if(w == -1) {
 	cout << "Processor " << rank << " received no work from " << askForWork << endl;
+        askForWork = (askForWork + 1) % numProcessors;
     } else { 
-	cout << "Processor " << rank << " received work '" << *w <<"' from " << askForWork << endl;
+	cout << "Processor " << rank << " received work '" << w <<"' from " << askForWork << endl;
     }
-    delete w;
     //  checkMessage(status);
     //} while(status.MPI_TAG != MSG_WORK_SENT && status.MPI_TAG !=MSG_WORK_NOWORK && !isFinished);
     //MPI_Status status;
@@ -185,9 +185,9 @@ void MaxHamilton::checkMessage(MPI_Status status){
       //prisla zprava, je treba ji obslouzit
       //v promenne status je tag (status.MPI_TAG), cislo odesilatele (status.MPI_SOURCE)
       //a pripadne cislo chyby (status.MPI_ERROR)
-      char t;
+      char t = ' ';
       MPI_Recv(&t, 1, MPI_CHAR, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
-	cout << "Process " << rank << " received message " << status.MPI_TAG << ": '" << t << "'" << endl;
+      cout << "Process " << rank << " received message " << status.MPI_TAG << ": '" << t << "'" << endl;
       switch (status.MPI_TAG)
       {
          case MSG_WORK_REQUEST : {// zadost o praci, prijmout a dopovedet
