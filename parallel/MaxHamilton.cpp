@@ -150,9 +150,10 @@ void MaxHamilton::waitForWork(){
     do {
 	    MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
 	    if (flag){
+                if(status.MPI_TAG == MSG_WORK_SENT) break;
 		checkMessage(status);
 	    }
-    } while(status.MPI_TAG != MSG_WORK_SENT);
+    } while(true);
 
     MPI_Recv(&w, 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
 
@@ -192,8 +193,6 @@ void MaxHamilton::checkMessage(MPI_Status status){
 		                         }
                                  }
 break;
-         case MSG_WORK_SENT : break;
-         case MSG_WORK_NOWORK : break;
          case MSG_TOKEN : //ukoncovaci token, prijmout a nasledne preposlat
                           // - bily nebo cerny v zavislosti na stavu procesu
                           if (rank == 0)
