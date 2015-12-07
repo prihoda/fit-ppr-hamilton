@@ -21,9 +21,9 @@ int MaxHamilton::neighbours(int m)
 
 void MaxHamilton::bestPathToArray(int * buffer){
     int n=0;
-    while(!stack.empty()){
-       buffer[n] = stack.top();
-       stack.pop(); 
+    while(!bestPath.empty()){
+       buffer[n] = bestPath.top();
+       bestPath.pop(); 
        n++;
     }
     cout << "Best path of process " << rank << ": ";
@@ -258,7 +258,7 @@ break;
                                //MPI_Send (bestPath, bestLength, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
                                 int * bestPath = new int[bestLength];
     				bestPathToArray(bestPath);
-                                cout << "Process " << rank << " was told to finish, sending " << done << endl;
+                                cout << "Process " << rank << " was told to finish, sending path of length " << bestLength << endl;
 				MPI_Send (&bestLength, 1, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
 				MPI_Send (bestPath, bestLength, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
 				delete [] bestPath;
