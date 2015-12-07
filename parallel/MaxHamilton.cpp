@@ -96,7 +96,7 @@ void MaxHamilton::max() {
         // pokud ma procesor peska, posle ho (rank+1 % numProcessors) procesoru
         if (token != 'N')
         {
-            MPI_Isend (token, 1, MPI_INT, ((rank+1) % numProcessors), MSG_TOKEN, MPI_COMM_WORLD, &request);
+            MPI_Isend (&token, 1, MPI_INT, ((rank+1) % numProcessors), MSG_TOKEN, MPI_COMM_WORLD, &request);
         }
         // ceka a kontroluje prichozi zpravy
     }
@@ -182,7 +182,8 @@ break;
                               else
                               {
                                   // odesli bileho peska procesoru (1 % numProcessors)
-                                  MPI_Send ('W', 1, MPI_INT, (1 % numProcessors), MSG_TOKEN, MPI_COMM_WORLD);
+			          t = 'W';
+                                  MPI_Send (&t, 1, MPI_INT, (1 % numProcessors), MSG_TOKEN, MPI_COMM_WORLD);
                               }
                           }
                           if (color == 'B')
@@ -204,7 +205,8 @@ break;
                            {
                                // posle sve nejlepsi reseni procesoru 0
                                //MPI_Send (bestPath, bestLength, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
-				MPI_Send (666, 1, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
+                                int done = 666;
+				MPI_Send (&done, 1, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
                            }
                            else
                            {
