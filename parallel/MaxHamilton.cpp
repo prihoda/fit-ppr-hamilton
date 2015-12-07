@@ -81,6 +81,7 @@ void MaxHamilton::max() {
     }
 
 
+    color = 'W';
 
     // uz nema praci
     if (rank == 0)
@@ -128,6 +129,7 @@ void MaxHamilton::max() {
 		}
 		if (token != 'N')
 		{
+        	    cout << "Process " << rank << " resending token " << token << endl;
 		    MPI_Isend (&token, 1, MPI_CHAR, ((rank+1) % numProcessors), MSG_TOKEN, MPI_COMM_WORLD, &request);
 		    token = 'N';
 		}
@@ -204,32 +206,8 @@ void MaxHamilton::checkMessage(MPI_Status status){
 break;
          case MSG_TOKEN : //ukoncovaci token, prijmout a nasledne preposlat
                           // - bily nebo cerny v zavislosti na stavu procesu
-                          if (rank == 0)
-                          {
-                              if (t == 'W') // pesek je bily
-                              {
-                                  for (int i = 1; i < numProcessors; i++)
-                                  {
-                                      // posli ypravu s MSG_FINISH vsem procesorum
-                                      MPI_Send (NULL, 0, MPI_CHAR, i, MSG_FINISH, MPI_COMM_WORLD);
-                                  }
-                              }
-                              else
-                              {
-                                  // odesli bileho peska procesoru (1 % numProcessors)
-			          t = 'W';
-                                  MPI_Send (&t, 1, MPI_CHAR, (1 % numProcessors), MSG_TOKEN, MPI_COMM_WORLD);
-                              }
-                          }
-                          if (color == 'B')
-                          {
-                             // obarvi peska na cerno
-                             token = 'B';
-                          }
-                          else
-                          {
-
-                          }
+                          token = t;
+                          if (color == 'B') token = 'B';
                           break;
          case MSG_FINISH : //konec vypoctu - proces 0 pomoci tokenu zjistil, ze jiz nikdo nema praci
                            //a rozeslal zpravu ukoncujici vypocet
