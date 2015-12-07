@@ -92,6 +92,7 @@ void MaxHamilton::max() {
     }
     else
     {
+	MPI_Request request;
         // pokud ma procesor peska, posle ho (rank+1 % numProcessors) procesoru
         if (token != 'N')
         {
@@ -147,26 +148,29 @@ void MaxHamilton::checkMessage(MPI_Status status){
       //a pripadne cislo chyby (status.MPI_ERROR)
       switch (status.MPI_TAG)
       {
-         case MSG_WORK_REQUEST : // zadost o praci, prijmout a dopovedet
-                                 // zaslat rozdeleny zasobnik a nebo odmitnuti MSG_WORK_NOWORK
-                                 work* w = getSharableWork();
-                                 if (w == NULL)
-                                 {
-                                    MPI_Isend (message, param[1], MPI_INT, (status.MPI_SOURCE % numProcessors) , MSG_WORK_NOWORK, MPI_COMM_WORLD, &request);
+         case MSG_WORK_REQUEST : {// zadost o praci, prijmout a dopovedet
+		                         // zaslat rozdeleny zasobnik a nebo odmitnuti MSG_WORK_NOWORK
+					MPI_Request request;
+		                         work* w = getSharableWork();
+		                         if (w == NULL)
+		                         {
+		                            MPI_Isend (NULL, 0, MPI_INT, (status.MPI_SOURCE % numProcessors) , MSG_WORK_NOWORK, MPI_COMM_WORLD, &request);
+		                         }
+		                         else
+		                         {
+					    int msg = 5;
+		                            MPI_Isend (&msg, 1, MPI_INT, (status.MPI_SOURCE % numProcessors), MSG_WORK_SENT, MPI_COMM_WORLD, &request);
+		                         }
                                  }
-                                 else
-                                 {
-                                    MPI_Isend (message, param[1], MPI_INT, (status.MPI_SOURCE % numProcessors), MSG_WORK_SENT, MPI_COMM_WORLD, &request);
-                                 }
-                                 break;
+break;
          case MSG_WORK_SENT : break;
          case MSG_WORK_NOWORK : break;
          case MSG_TOKEN : //ukoncovaci token, prijmout a nasledne preposlat
                           // - bily nebo cerny v zavislosti na stavu procesu
                           if (rank == 0)
                           {
-                              char t = '';
-                              MPI_Recv(t, 1, MPI_INT, status.MPI_SOURCE, MSG_TOKEN, MPI_COMM_WORLD, &status);
+                              char t;
+                              MPI_Recv(&t, 1, MPI_INT, status.MPI_SOURCE, MSG_TOKEN, MPI_COMM_WORLD, &status);
                               if (t == 'W') // pesek je bily
                               {
                                   for (int i = 1; i < numProcessors; i++)
@@ -199,8 +203,8 @@ void MaxHamilton::checkMessage(MPI_Status status){
                            if (rank != 0)
                            {
                                // posle sve nejlepsi reseni procesoru 0
-                               MPI_Send (bestPath, bestLength, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
-
+                               //MPI_Send (bestPath, bestLength, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
+				MPI_Send (666, 1, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
                            }
                            else
                            {
