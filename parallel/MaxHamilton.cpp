@@ -118,6 +118,7 @@ void MaxHamilton::max() {
     }
     else
     {
+	MPI_Status status;
 	MPI_Request request;
         // pokud ma procesor peska, posle ho (rank+1 % numProcessors) procesoru
         cout << "Process " << rank << " finishing naturally" << endl;
@@ -219,7 +220,7 @@ break;
                                // posle sve nejlepsi reseni procesoru 0
                                //MPI_Send (bestPath, bestLength, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
                                 int done = 666;
-                                cout << "Process " << rank " was told to finish, sending " << done << endl;
+                                cout << "Process " << rank << " was told to finish, sending " << done << endl;
 				MPI_Send (&done, 1, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
 		                   MPI_Finalize();
 		                   exit (0);

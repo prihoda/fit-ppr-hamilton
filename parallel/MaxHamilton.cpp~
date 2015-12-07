@@ -81,6 +81,7 @@ void MaxHamilton::max() {
     }
 
 
+    color = 'W';
 
     // uz nema praci
     if (rank == 0)
@@ -117,6 +118,7 @@ void MaxHamilton::max() {
     }
     else
     {
+	MPI_Status status;
 	MPI_Request request;
         // pokud ma procesor peska, posle ho (rank+1 % numProcessors) procesoru
         cout << "Process " << rank << " finishing naturally" << endl;
