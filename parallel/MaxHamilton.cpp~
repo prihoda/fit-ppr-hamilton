@@ -143,42 +143,25 @@ void MaxHamilton::max() {
 }
 void MaxHamilton::waitForWork(){
     int flag;
-    cout << "Processor " << rank << " asking " << askForWork << " for work" << endl;
+    cout << "Processor " << rank << " asking " << askForWork << " for work..." << endl;
     MPI_Send (NULL, 0, MPI_CHAR, askForWork, MSG_WORK_REQUEST, MPI_COMM_WORLD);
     int w = -1;
     MPI_Status status;
-    //do {
-    MPI_Recv(&w, 1, MPI_INT, askForWork, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
-    
+    do {
+	    MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+	    if (flag){
+		checkMessage(status);
+	    }
+    } while(status.MPI_TAG != MSG_WORK_SENT);
+
+    MPI_Recv(&w, 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
+
     if(w == -1) {
 	cout << "Processor " << rank << " received no work from " << askForWork << endl;
         askForWork = (askForWork + 1) % numProcessors;
     } else { 
 	cout << "Processor " << rank << " received work '" << w <<"' from " << askForWork << endl;
     }
-    //  checkMessage(status);
-    //} while(status.MPI_TAG != MSG_WORK_SENT && status.MPI_TAG !=MSG_WORK_NOWORK && !isFinished);
-    //MPI_Status status;
-    //MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-    //if (flag)
-    //{
-      //prisla zprava, je treba ji obslouzit
-      //v promenne status je tag (status.MPI_TAG), cislo odesilatele (status.MPI_SOURCE)
-      //a pripadne cislo chyby (status.MPI_ERROR)
-      switch (status.MPI_TAG)
-      {
-         case MSG_WORK_SENT : // prisel rozdeleny zasobnik, prijmout
-                              // deserializovat a spustit vypocet
-                              
-
-                              break;
-         /*case MSG_WORK_NOWORK : // odmitnuti zadosti o praci
-                                // zkusit jiny proces
-                                // a nebo se prepnout do pasivniho stavu a cekat na token
-                                askForWork = (askForWork + 1) % numProcessors;
-                                break;*/
-      }
-    //}
 
 }
 void MaxHamilton::checkMessage(MPI_Status status){
@@ -334,7 +317,7 @@ void MaxHamilton::setBestPath(int nodeAtEnd) {
     bestLength = length;
     current = nodeAtEnd;
     while (current != -1) {
-        cout << current << " ";
+        //cout << current << " ";
         bestPath.push(current);
         current = g->prev[current];
     }
@@ -344,7 +327,7 @@ void MaxHamilton::setBestPath(int nodeAtEnd) {
         foundLimit = true;
     }
 
-    cout << endl;
+    //cout << endl;
 }
 
 MaxHamilton::MaxHamilton(Graph *graph, int numProcessors, int rank) {
