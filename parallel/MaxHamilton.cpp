@@ -183,7 +183,7 @@ void MaxHamilton::checkMessage(MPI_Status status){
       //a pripadne cislo chyby (status.MPI_ERROR)
       char t = ' ';
       MPI_Recv(&t, 1, MPI_CHAR, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
-      cout << "Process " << rank << " received message " << status.MPI_TAG << ": '" << t << "'" << endl;
+      cout << "Process " << rank << " received message " << status.MPI_TAG << ": '" << t << "' from " << status.MPI_SOURCE << endl;
       switch (status.MPI_TAG)
       {
          case MSG_WORK_REQUEST : {// zadost o praci, prijmout a dopovedet
