@@ -303,9 +303,10 @@ work* MaxHamilton::getSharableWork(){
       edge rootEdge = s.back();
       s.pop_back();
       work* workUnit = new work;
-      workUnit->stackSize = 1;
-      workUnit->stack = new int[1];
-      workUnit->stack[0] = rootEdge;
+      workUnit->stackSize = 2;
+      workUnit->stack = new int[2];
+      workUnit->stack[0] = rootEdge.from;
+      workUnit->stack[1] = rootEdge.to;
 
       return workUnit;
    }
