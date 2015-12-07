@@ -145,16 +145,17 @@ void MaxHamilton::waitForWork(){
     int flag;
     cout << "Processor " << rank << " asking " << askForWork << " for work" << endl;
     MPI_Send (NULL, 0, MPI_CHAR, askForWork, MSG_WORK_REQUEST, MPI_COMM_WORLD);
-    int w;
+    int *w = new int;
     MPI_Status status;
     //do {
-    MPI_Recv(&w, 1, MPI_INT, askForWork, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
+    MPI_Recv(w, 1, MPI_INT, askForWork, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
     
     if(w == NULL) {
 	cout << "Processor " << rank << " received no work from " << askForWork << endl;
     } else { 
 	cout << "Processor " << rank << " received work '" << w <<"' from " << askForWork << endl;
     }
+    delete w;
     //  checkMessage(status);
     //} while(status.MPI_TAG != MSG_WORK_SENT && status.MPI_TAG !=MSG_WORK_NOWORK && !isFinished);
     //MPI_Status status;
