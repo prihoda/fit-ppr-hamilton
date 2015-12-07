@@ -33,7 +33,7 @@ void MaxHamilton::bestPathToArray(int * buffer){
     cout << endl;
 }
 void MaxHamilton::max() {
-
+    char blank = ' ';
     numOperations = 0;
     foundLimit = false;
     MPI_Comm_rank(MPI_COMM_WORLD, &askForWork);
@@ -139,7 +139,7 @@ void MaxHamilton::max() {
 	// procesor 0 ceka na odpovedi vsech procesoru
 	for (int i = 1; i < numProcessors; i++)
 	{
-	    MPI_Send (NULL, 0, MPI_CHAR, i, MSG_FINISH, MPI_COMM_WORLD);
+	    MPI_Send (&blank, 1, MPI_CHAR, i, MSG_FINISH, MPI_COMM_WORLD);
 	}
 
     int * bestPath = new int[bestLength];
@@ -184,7 +184,7 @@ void MaxHamilton::max() {
 }
 void MaxHamilton::waitForWork(){
     cout << "Processor " << rank << " asking " << askForWork << " for work, waiting..." << endl;
-    MPI_Send (NULL, 0, MPI_CHAR, askForWork, MSG_WORK_REQUEST, MPI_COMM_WORLD);
+    MPI_Send (&blank, 1, MPI_CHAR, askForWork, MSG_WORK_REQUEST, MPI_COMM_WORLD);
     int w = -1;
     MPI_Status status;
     int stackSize = 0;
@@ -253,7 +253,7 @@ void MaxHamilton::checkMessage(MPI_Status status){
 		                         if (w == NULL)
 		                         {
 	cout << "Process " << rank << " sending no work message to " << status.MPI_SOURCE << endl;
-		                            MPI_Isend (NULL, 0, MPI_INT, status.MPI_SOURCE , MSG_WORK_SENT, MPI_COMM_WORLD, &request);
+		                            MPI_Isend (' ', ' ', MPI_INT, status.MPI_SOURCE , MSG_WORK_SENT, MPI_COMM_WORLD, &request);
 		                         }
 		                         else
 		                         {

@@ -33,7 +33,7 @@ void MaxHamilton::bestPathToArray(int * buffer){
     cout << endl;
 }
 void MaxHamilton::max() {
-
+    char blank = ' ';
     numOperations = 0;
     foundLimit = false;
     MPI_Comm_rank(MPI_COMM_WORLD, &askForWork);
@@ -139,7 +139,7 @@ void MaxHamilton::max() {
 	// procesor 0 ceka na odpovedi vsech procesoru
 	for (int i = 1; i < numProcessors; i++)
 	{
-	    MPI_Send (NULL, 0, MPI_CHAR, i, MSG_FINISH, MPI_COMM_WORLD);
+	    MPI_Send (&blank, 1, MPI_CHAR, i, MSG_FINISH, MPI_COMM_WORLD);
 	}
 
     int * bestPath = new int[bestLength];
@@ -253,7 +253,7 @@ void MaxHamilton::checkMessage(MPI_Status status){
 		                         if (w == NULL)
 		                         {
 	cout << "Process " << rank << " sending no work message to " << status.MPI_SOURCE << endl;
-		                            MPI_Isend (NULL, 0, MPI_INT, status.MPI_SOURCE , MSG_WORK_SENT, MPI_COMM_WORLD, &request);
+		                            MPI_Isend (' ', ' ', MPI_INT, status.MPI_SOURCE , MSG_WORK_SENT, MPI_COMM_WORLD, &request);
 		                         }
 		                         else
 		                         {
@@ -261,10 +261,10 @@ void MaxHamilton::checkMessage(MPI_Status status){
 					    int structSize = w->stackSize + g->size;
 					    int * workStruct = new int[structSize];
   				            int position=0;
-					    cout << "Process " << rank << " sending work of size " << structSize <<" to " << status.MPI_SOURCE << endl;
+					    MPI_Isend (&(w->stackSize), 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SIZE, MPI_COMM_WORLD, &request);
+		                            cout << "Process " << rank << " sending work of size " << structSize <<" to " << status.MPI_SOURCE << endl;
 					    MPI_Pack(w->stack, w->stackSize, MPI_INT, workStruct, structSize, &position, MPI_COMM_WORLD);
 					    MPI_Pack(g->prev, g->size, MPI_INT, workStruct, structSize, &position, MPI_COMM_WORLD);
-		                            MPI_Isend (&(w->stackSize), 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SIZE, MPI_COMM_WORLD, &request);
 		                            MPI_Isend (workStruct, structSize, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &request);
 					    delete [] workStruct;
 					    color = 'B';
