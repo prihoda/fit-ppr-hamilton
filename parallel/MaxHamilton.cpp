@@ -33,7 +33,6 @@ void MaxHamilton::bestPathToArray(int * buffer){
     cout << endl;
 }
 void MaxHamilton::max() {
-    char blank = ' ';
     numOperations = 0;
     foundLimit = false;
     MPI_Comm_rank(MPI_COMM_WORLD, &askForWork);

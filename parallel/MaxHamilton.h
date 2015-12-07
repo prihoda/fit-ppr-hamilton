@@ -51,6 +51,7 @@ protected:
     char color;
     char token;
     bool isFinished;
+    char blank = ' ';
 
 public:
 
