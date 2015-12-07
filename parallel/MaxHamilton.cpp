@@ -317,11 +317,11 @@ work* MaxHamilton::getSharableWork(){
       int toShare = s.size()/2;
       workUnit->stackSize = toShare*2;
       workUnit->stack = new int[toShare*2];
-      for(int s = 0; s<toShare; s++){
+      for(int i = 0; i<toShare; i++){
 	      edge rootEdge = s.back();
 	      s.pop_back();
-	      workUnit->stack[s*2] = rootEdge.from;
-	      workUnit->stack[s*2+1] = rootEdge.to;
+	      workUnit->stack[i*2] = rootEdge.from;
+	      workUnit->stack[i*2+1] = rootEdge.to;
 	}
       return workUnit;
    }
