@@ -89,10 +89,11 @@ void MaxHamilton::max() {
 	MPI_Status status;
         char w = 'W';
         cout << "Main process has finished working, waiting for white token" << endl;
-        do {
+	MPI_Send (&w, 1, MPI_CHAR, ((rank+1) % numProcessors), MSG_TOKEN, MPI_COMM_WORLD);
+
+	do {
         // posle bileho peska
 		int flag;
-		MPI_Send (&w, 1, MPI_CHAR, ((rank+1) % numProcessors), MSG_TOKEN, MPI_COMM_WORLD);
 		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
 		if (flag){
 		    checkMessage(status);
@@ -209,6 +210,11 @@ break;
                           // - bily nebo cerny v zavislosti na stavu procesu
                           token = t;
                           if (color == 'B') token = 'B';
+                          if (rank == 0 && token == 'B'){
+				char w = 'W';
+				token = 'N';
+				MPI_Send (&w, 1, MPI_CHAR, ((rank+1) % numProcessors), MSG_TOKEN, MPI_COMM_WORLD);
+			  }
                           break;
          case MSG_FINISH : //konec vypoctu - proces 0 pomoci tokenu zjistil, ze jiz nikdo nema praci
                            //a rozeslal zpravu ukoncujici vypocet
