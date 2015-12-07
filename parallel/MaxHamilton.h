@@ -26,7 +26,6 @@ struct edge {
 struct work {
     int stackSize;
     int* stack;
-    int*prev;
 };
 
 
