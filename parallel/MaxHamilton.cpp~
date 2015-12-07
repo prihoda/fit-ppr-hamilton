@@ -222,8 +222,15 @@ void MaxHamilton::waitForWork(){
 	    e.to = stack[i+1];
 	    s.push_front(e);       
 	}
+	cout << "Processor " << rank << " received work from " << askForWork << ": " << endl;
+	for(int i=0; i<stackSize; i+=2){
+	    edge e;
+	    cout << e.from << " -> " << e.to << endl;
+	    e.from = stack[i];
+	    e.to = stack[i+1];
+	    s.push_front(e);       
+	}
 	delete [] stack;
-	cout << "Processor " << rank << " received work from " << askForWork << endl;
     }
 
 }
@@ -255,7 +262,7 @@ void MaxHamilton::checkMessage(MPI_Status status){
 					    int * workStruct = new int[structSize];
   				            int position=0;
 					    MPI_Pack(w->stack, w->stackSize, MPI_INT, workStruct, structSize, &position, MPI_COMM_WORLD);
-					    MPI_Pack(w->prev, g->size, MPI_INT, workStruct, structSize, &position, MPI_COMM_WORLD);
+					    MPI_Pack(g->prev, g->size, MPI_INT, workStruct, structSize, &position, MPI_COMM_WORLD);
 		                            MPI_Isend (&(w->stackSize), 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SIZE, MPI_COMM_WORLD, &request);
 		                            MPI_Isend (workStruct, structSize, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &request);
 					    delete [] workStruct;

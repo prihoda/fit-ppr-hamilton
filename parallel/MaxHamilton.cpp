@@ -222,8 +222,16 @@ void MaxHamilton::waitForWork(){
 	    e.to = stack[i+1];
 	    s.push_front(e);       
 	}
+	cout << "Processor " << rank << " received work from " << askForWork << ": ";
+	for(int i=0; i<stackSize; i+=2){
+	    edge e;
+	    cout << e.from << "->" << e.to << " ";
+	    e.from = stack[i];
+	    e.to = stack[i+1];
+	    s.push_front(e);       
+	}
+	cout << endl;
 	delete [] stack;
-	cout << "Processor " << rank << " received work from " << askForWork << endl;
     }
 
 }
