@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
       //cout << "Input graph: " << endl;
       file >> *graph;
       //cout << "Graph: " << endl << *graph << endl;
-       clock_t start, end;
+      clock_t start, end;
       start = clock();
 
       file.close();
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
   end = clock();
   cout << "Time required for execution: " << (double)(end-start)/CLOCKS_PER_SEC << " seconds." << "\n\n";
   MPI_Finalize();
-    
+
 /*
 
       int value = 17;

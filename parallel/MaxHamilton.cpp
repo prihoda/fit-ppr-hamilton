@@ -24,6 +24,10 @@ void MaxHamilton::max() {
 
     numOperations = 0;
     foundLimit = false;
+    MPI_Comm_rank(MPI_COMM_WORLD, &askToWork);
+    askToWork = (askToWork + 1) % numProcessors;
+    color = 'W';
+    token = 'N';
 
     // remove old best path
     bestLength = 0;
@@ -58,16 +62,42 @@ void MaxHamilton::max() {
             root = current.to;
         }
         if ((numOperations % CHECK_MSG_AMOUNT)==0){
-	   int flag;
-	   MPI_Status status;
-	   MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-	   if (flag){
-              checkMessage(status);
-	   }
-	}
+            int flag;
+            MPI_Status status;
+            MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+            if (flag){
+                checkMessage(status);
+            }
+        }
 
         visit(current);
         numOperations++;
+    }
+
+    // uz nema praci
+    if (rank == 0)
+    {
+        // posle bileho peska
+        // ceka a kontroluje prichozi zpravy
+        // pokud prijde bily pesek, ukonci vypocet
+        // pokud prijde cerny pesek, posle znovu bileho peska
+
+        // procesor 0 ceka na odpovedi vsech procesoru
+        for (int i = 1; i < numProcessors; i++)
+        {
+            // prijme ypravu s nejlepsi cestou procesoru i
+            // porovna se svou nejlepsi kruznici
+            // pokud je dosla kruznice vetsi nez dosud nejlepsi, prepis
+        }
+    }
+    else
+    {
+        // pokud ma procesor peska, posle ho (rank+1 % numProcessors) procesoru
+        if (token != 'N')
+        {
+            MPI_Isend (token, 1, MPI_INT, ((rank+1) % numProcessors), MSG_TOKEN, MPI_COMM_WORLD, &request);
+        }
+        // ceka a kontroluje prichozi zpravy
     }
 
     // done, print the longest circle
@@ -98,15 +128,18 @@ void MaxHamilton::waitForWork(){
       {
          case MSG_WORK_SENT : // prisel rozdeleny zasobnik, prijmout
                               // deserializovat a spustit vypocet
+
+                              color = 'B';
                               break;
          case MSG_WORK_NOWORK : // odmitnuti zadosti o praci
                                 // zkusit jiny proces
                                 // a nebo se prepnout do pasivniho stavu a cekat na token
+                                askToWork++;
                                 break;
       }
       checkMessage(status);
     }
-    
+
 }
 void MaxHamilton::checkMessage(MPI_Status status){
       //prisla zprava, je treba ji obslouzit
@@ -116,33 +149,80 @@ void MaxHamilton::checkMessage(MPI_Status status){
       {
          case MSG_WORK_REQUEST : // zadost o praci, prijmout a dopovedet
                                  // zaslat rozdeleny zasobnik a nebo odmitnuti MSG_WORK_NOWORK
+                                 work* w = getSharableWork();
+                                 if (w == NULL)
+                                 {
+                                    MPI_Isend (message, param[1], MPI_INT, (status.MPI_SOURCE % numProcessors) , MSG_WORK_NOWORK, MPI_COMM_WORLD, &request);
+                                 }
+                                 else
+                                 {
+                                    MPI_Isend (message, param[1], MPI_INT, (status.MPI_SOURCE % numProcessors), MSG_WORK_SENT, MPI_COMM_WORLD, &request);
+                                 }
                                  break;
          case MSG_WORK_SENT : break;
          case MSG_WORK_NOWORK : break;
          case MSG_TOKEN : //ukoncovaci token, prijmout a nasledne preposlat
                           // - bily nebo cerny v zavislosti na stavu procesu
+                          if (rank == 0)
+                          {
+                              char t = '';
+                              MPI_Recv(t, 1, MPI_INT, status.MPI_SOURCE, MSG_TOKEN, MPI_COMM_WORLD, &status);
+                              if (t == 'W') // pesek je bily
+                              {
+                                  for (int i = 1; i < numProcessors; i++)
+                                  {
+                                      // posli ypravu s MSG_FINISH vsem procesorum
+                                      MPI_Send (NULL, 0, MPI_INT, i, MSG_FINISH, MPI_COMM_WORLD);
+                                  }
+                              }
+                              else
+                              {
+                                  // odesli bileho peska procesoru (1 % numProcessors)
+                                  MPI_Send ('W', 1, MPI_INT, (1 % numProcessors), MSG_TOKEN, MPI_COMM_WORLD);
+                              }
+                          }
+                          if (color == 'B')
+                          {
+                             // obarvi peska na cerno
+                             token = 'B';
+                          }
+                          else
+                          {
+
+                          }
                           break;
          case MSG_FINISH : //konec vypoctu - proces 0 pomoci tokenu zjistil, ze jiz nikdo nema praci
                            //a rozeslal zpravu ukoncujici vypocet
                            //mam-li reseni, odeslu procesu 0
                            //nasledne ukoncim spoji cinnost
                            //jestlize se meri cas, nezapomen zavolat koncovou barieru MPI_Barrier (MPI_COMM_WORLD)
+                           if (rank != 0)
+                           {
+                               // posle sve nejlepsi reseni procesoru 0
+                               MPI_Send (bestPath, bestLength, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
+
+                           }
+                           else
+                           {
+                                // nejaky procesor nasel kruznici delky trivialni horni mezi
+                           }
                            MPI_Finalize();
                            exit (0);
                            break;
          default : std::cout << "neznamy typ zpravy"; break;
       }
 }
+
 work* MaxHamilton::getSharableWork(){
    if(s.back().from == -1){
       edge rootEdge = s.back();
       s.pop_back();
       work* workUnit = new work;
       workUnit->root = rootEdge;
-      
+
       return workUnit;
    }
-   
+
    return NULL;
 }
 void MaxHamilton::visit(edge currentEdge) {
