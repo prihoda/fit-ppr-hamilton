@@ -209,12 +209,15 @@ void MaxHamilton::waitForWork(){
 	int * workStruct = new int[structSize];
   	int position=0;
         MPI_Recv(&w, stackSize, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
-        MPI_Unpack(workStruct, LENGTH, &position, stack, 1, MPI_FLOAT, MPI_COMM_WORLD);
-        MPI_Unpack(workStruct, LENGTH, &position, g->prev, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Unpack(workStruct, structSize, &position, stack, 1, MPI_FLOAT, MPI_COMM_WORLD);
+        MPI_Unpack(workStruct, structSize, &position, g->prev, 1, MPI_INT, MPI_COMM_WORLD);
 	delete [] workStruct;
         s.clear();
-	for(int i=0; i<stackSize; i++){
-	    s.push_front(stack[i]);       
+	for(int i=0; i<stackSize; i+=2){
+	    edge e;
+	    e.from = stack[i];
+	    e.to = stack[i+1];
+	    s.push_front(e);       
 	}
 	delete [] stack;
 	cout << "Processor " << rank << " received work from " << askForWork << endl;
