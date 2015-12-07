@@ -134,7 +134,7 @@ void MaxHamilton::max() {
 	} while (token != 'W' || isFinished);
 
 	cout << "Main process received white token, waiting for results" << endl;
-
+ 	char blank = ' ';
 	// procesor 0 ceka na odpovedi vsech procesoru
 	for (int i = 1; i < numProcessors; i++)
 	{
@@ -183,6 +183,7 @@ void MaxHamilton::max() {
 }
 void MaxHamilton::waitForWork(){
     cout << "Processor " << rank << " asking " << askForWork << " for work, waiting..." << endl;
+    char blank = ' ';
     MPI_Send (&blank, 1, MPI_CHAR, askForWork, MSG_WORK_REQUEST, MPI_COMM_WORLD);
     int w = -1;
     MPI_Status status;
@@ -400,6 +401,7 @@ MaxHamilton::MaxHamilton(Graph *graph, int numProcessors, int rank) {
     g = graph;
     this->numProcessors = numProcessors;
     this->rank = rank;
+    
 }
 
 
