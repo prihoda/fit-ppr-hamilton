@@ -110,8 +110,8 @@ void MaxHamilton::max() {
         for (int i = 1; i < numProcessors; i++)
         {
 	    int w;
-	    MPI_Recv(&w, 1, MPI_INT, status.MPI_SOURCE, MSG_TOKEN, MPI_COMM_WORLD, &status);
-            cout << "Main process received result " << w << endl;
+	    MPI_Recv(&w, 1, MPI_INT, MPI_ANY_SOURCE, MSG_TOKEN, MPI_COMM_WORLD, &status);
+            cout << "Main process received result " << w << " from " << status.MPI_SOURCE << endl;
             // prijme ypravu s nejlepsi cestou procesoru i
             // porovna se svou nejlepsi kruznici
             // pokud je dosla kruznice vetsi nez dosud nejlepsi, prepis
@@ -152,6 +152,7 @@ void MaxHamilton::max() {
         cout << bestPath.top() << " ";
         bestPath.pop();
     }
+    MPI_Finalize();
     cout << endl;
 }
 void MaxHamilton::waitForWork(){
