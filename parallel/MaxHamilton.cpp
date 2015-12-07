@@ -312,15 +312,17 @@ break;
 }
 
 work* MaxHamilton::getSharableWork(){
-   if(s.back().from == -1){
-      edge rootEdge = s.back();
-      s.pop_back();
+   if(s.size() > 2 + g->size/3){
       work* workUnit = new work;
-      workUnit->stackSize = 2;
-      workUnit->stack = new int[2];
-      workUnit->stack[0] = rootEdge.from;
-      workUnit->stack[1] = rootEdge.to;
-
+      int toShare = s.size()/2;
+      workUnit->stackSize = toShare*2;
+      workUnit->stack = new int[toShare*2];
+      for(int s = 0; s<toShare; s++){
+	      edge rootEdge = s.back();
+	      s.pop_back();
+	      workUnit->stack[s*2] = rootEdge.from;
+	      workUnit->stack[s*2+1] = rootEdge.to;
+	}
       return workUnit;
    }
 

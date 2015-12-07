@@ -26,6 +26,7 @@ struct edge {
 struct work {
     int stackSize;
     int* stack;
+    int* prev;
 };
 
 
@@ -51,7 +52,6 @@ protected:
     char color;
     char token;
     bool isFinished;
-    char blank;
 
 public:
 

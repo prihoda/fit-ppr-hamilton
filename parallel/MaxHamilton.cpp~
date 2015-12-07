@@ -211,9 +211,9 @@ void MaxHamilton::waitForWork(){
 	int * stack = new int[stackSize];
 	int * workStruct = new int[structSize];
   	int position=0;
-        MPI_Recv(&w, stackSize, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
-        MPI_Unpack(workStruct, structSize, &position, stack, 1, MPI_FLOAT, MPI_COMM_WORLD);
-        MPI_Unpack(workStruct, structSize, &position, g->prev, 1, MPI_INT, MPI_COMM_WORLD);
+        MPI_Recv(workStruct, stackSize, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
+        MPI_Unpack(workStruct, structSize, &position, stack, stackSize, MPI_FLOAT, MPI_COMM_WORLD);
+        MPI_Unpack(workStruct, structSize, &position, g->prev, g->size, MPI_INT, MPI_COMM_WORLD);
 	delete [] workStruct;
         s.clear();
 	for(int i=0; i<stackSize; i+=2){
@@ -312,15 +312,17 @@ break;
 }
 
 work* MaxHamilton::getSharableWork(){
-   if(s.back().from == -1){
-      edge rootEdge = s.back();
-      s.pop_back();
+   if(s.size() > 2 + g->size/3){
       work* workUnit = new work;
-      workUnit->stackSize = 2;
-      workUnit->stack = new int[2];
-      workUnit->stack[0] = rootEdge.from;
-      workUnit->stack[1] = rootEdge.to;
-
+      int toShare = s.size()/2;
+      workUnit->stackSize = toShare*2;
+      workUnit->stack = new int[toShare*2];
+      for(int s = 0; s<toShare; s++){
+	      edge rootEdge = s.back();
+	      s.pop_back();
+	      workUnit->stack[s*2] = rootEdge.from;
+	      workUnit->stack[s*2+1] = rootEdge.to;
+	}
       return workUnit;
    }
 
