@@ -257,11 +257,11 @@ void MaxHamilton::checkMessage(MPI_Status status){
 		                         }
 		                         else
 		                         {
-						cout << "Process " << rank << " sending work to " << status.MPI_SOURCE << endl;
-					
+						
 					    int structSize = w->stackSize + g->size;
 					    int * workStruct = new int[structSize];
   				            int position=0;
+					    cout << "Process " << rank << " sending work of size " << structSize <<" to " << status.MPI_SOURCE << endl;
 					    MPI_Pack(w->stack, w->stackSize, MPI_INT, workStruct, structSize, &position, MPI_COMM_WORLD);
 					    MPI_Pack(g->prev, g->size, MPI_INT, workStruct, structSize, &position, MPI_COMM_WORLD);
 		                            MPI_Isend (&(w->stackSize), 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SIZE, MPI_COMM_WORLD, &request);
@@ -269,6 +269,7 @@ void MaxHamilton::checkMessage(MPI_Status status){
 					    delete [] workStruct;
 					    color = 'B';
 		                         }
+					delete w;
                                  }
 break;
          case MSG_TOKEN : //ukoncovaci token, prijmout a nasledne preposlat
