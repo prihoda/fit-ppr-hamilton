@@ -48,9 +48,9 @@ void MaxHamilton::max() {
 
     // start at each node
     cout << "Process no. " << rank << " starting from nodes { ";
-    for(int i=rank; i<g->size; i++) {
-       // if(i%numProcessors != 0) continue;
-       if(i != 1) continue;
+    for(int i=0; i<g->size; i++) {
+       // if(i%numProcessors != rank) continue;
+       if(rank != 1) continue;
         if (neighbours(i) > 1){//(!foundLimit) && (
             cout << i << " ";
 	// prepare first edge (beginning is marked with -1)
