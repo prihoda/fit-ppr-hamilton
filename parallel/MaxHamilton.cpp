@@ -54,8 +54,8 @@ void MaxHamilton::max() {
 
     // keep removing edges from stack
 
-    while (askForWork != rank) {
-	    while (!s.empty()) {
+    while (askForWork != rank && !isFinished) {
+	    while (!s.empty() && !isFinished) {
 		edge current = s.front();
 		s.pop_front();
 		if(current.from == -1){
@@ -73,7 +73,6 @@ void MaxHamilton::max() {
 		    MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
 		    if (flag){
 		        checkMessage(status);
-                        if(isFinished) break 2;
 		    }
 		}
 	    }
@@ -91,6 +90,7 @@ void MaxHamilton::max() {
         cout << "Main process has finished working, waiting for white token" << endl;
         do {
         // posle bileho peska
+		int flag;
 		MPI_Send (&w, 1, MPI_CHAR, ((rank+1) % numProcessors), MSG_TOKEN, MPI_COMM_WORLD);
 		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
 		if (flag){
@@ -146,6 +146,7 @@ void MaxHamilton::waitForWork(){
     cout << "Processor " << rank << " asking " << askForWork << " for work" << endl;
     MPI_Send (NULL, 0, MPI_CHAR, askForWork, MSG_WORK_REQUEST, MPI_COMM_WORLD);
     int w;
+    MPI_Status status;
     MPI_Recv(&w, 1, MPI_INT, status.MPI_SOURCE, MSG_TOKEN, MPI_COMM_WORLD, &status);
     while (status.MPI_TAG != MSG_WORK_SENT && status.MPI_TAG !=MSG_WORK_NOWORK){
       checkMessage(status);
