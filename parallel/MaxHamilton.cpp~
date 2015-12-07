@@ -147,10 +147,16 @@ void MaxHamilton::waitForWork(){
     MPI_Send (NULL, 0, MPI_CHAR, askForWork, MSG_WORK_REQUEST, MPI_COMM_WORLD);
     int w;
     MPI_Status status;
-    do {
-      MPI_Recv(&w, 1, MPI_INT, askForWork, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-      checkMessage(status);
-    } while(status.MPI_TAG != MSG_WORK_SENT && status.MPI_TAG !=MSG_WORK_NOWORK && !isFinished);
+    //do {
+    MPI_Recv(&w, 1, MPI_INT, askForWork, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
+    
+    if(w == NULL) {
+	cout << "Processor " << rank << " received no work from " << askForWork << endl;
+    } else { 
+	cout << "Processor " << rank << " received work '" << w <<"' from " << askForWork << endl;
+    }
+    //  checkMessage(status);
+    //} while(status.MPI_TAG != MSG_WORK_SENT && status.MPI_TAG !=MSG_WORK_NOWORK && !isFinished);
     //MPI_Status status;
     //MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
     //if (flag)
@@ -163,13 +169,13 @@ void MaxHamilton::waitForWork(){
          case MSG_WORK_SENT : // prisel rozdeleny zasobnik, prijmout
                               // deserializovat a spustit vypocet
                               
-                              color = 'B';
+
                               break;
-         case MSG_WORK_NOWORK : // odmitnuti zadosti o praci
+         /*case MSG_WORK_NOWORK : // odmitnuti zadosti o praci
                                 // zkusit jiny proces
                                 // a nebo se prepnout do pasivniho stavu a cekat na token
                                 askForWork = (askForWork + 1) % numProcessors;
-                                break;
+                                break;*/
       }
     //}
 
