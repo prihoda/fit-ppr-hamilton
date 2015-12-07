@@ -48,7 +48,9 @@ void MaxHamilton::max() {
 
     // start at each node
     cout << "Process no. " << rank << " starting from nodes { ";
-    for(int i=rank; i<g->size; i+=numProcessors) {
+    for(int i=rank; i<g->size; i++) {
+       // if(i%numProcessors != 0) continue;
+       if(i != 1) continue;
         if (neighbours(i) > 1){//(!foundLimit) && (
             cout << i << " ";
 	// prepare first edge (beginning is marked with -1)
@@ -67,6 +69,7 @@ void MaxHamilton::max() {
     // keep removing edges from stack
 
     while (askForWork != rank && !isFinished) {
+	    if(!s.empty()) cout << "Process " << rank << " is starting from node " << s.front() << endl;
 	    while (!s.empty() && !isFinished) {
 		edge current = s.front();
 		s.pop_front();
