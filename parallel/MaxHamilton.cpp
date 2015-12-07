@@ -211,6 +211,7 @@ void MaxHamilton::waitForWork(){
 	int * stack = new int[stackSize];
 	int * workStruct = new int[structSize];
   	int position=0;
+	cout << "Processor " << rank << " is receiving work of size " << structSize << " from " << askForWork << ": "  << endl;
         MPI_Recv(workStruct, structSize, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
         MPI_Unpack(workStruct, structSize, &position, stack, stackSize, MPI_FLOAT, MPI_COMM_WORLD);
         MPI_Unpack(workStruct, structSize, &position, g->prev, g->size, MPI_INT, MPI_COMM_WORLD);
@@ -222,7 +223,6 @@ void MaxHamilton::waitForWork(){
 	    e.to = stack[i+1];
 	    s.push_front(e);       
 	}
-	cout << "Processor " << rank << " received work from " << askForWork << ": ";
 	for(int i=0; i<stackSize; i+=2){
 	    edge e;
 	    cout << e.from << "->" << e.to << " ";
