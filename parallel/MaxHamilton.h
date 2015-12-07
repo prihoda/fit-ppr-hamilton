@@ -46,9 +46,10 @@ protected:
     void checkMessage(MPI_Status status);
     void waitForWork();
     int neighbours(int m);
-    int askToWork;
+    int askForWork;
     char color;
     char token;
+    bool isFinished;
 
 public:
 

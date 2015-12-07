@@ -24,8 +24,8 @@ void MaxHamilton::max() {
 
     numOperations = 0;
     foundLimit = false;
-    MPI_Comm_rank(MPI_COMM_WORLD, &askToWork);
-    askToWork = (askToWork + 1) % numProcessors;
+    MPI_Comm_rank(MPI_COMM_WORLD, &askForWork);
+    askForWork = (askForWork + 1) % numProcessors;
     color = 'W';
     token = 'N';
 
@@ -53,38 +53,63 @@ void MaxHamilton::max() {
     //cout << "Starting at " << root << endl;
 
     // keep removing edges from stack
-    while (!s.empty()) {
-        edge current = s.front();
-        s.pop_front();
-        if(current.from == -1){
-            // reset graph variables
-            g->reset();
-            root = current.to;
-        }
-        if ((numOperations % CHECK_MSG_AMOUNT)==0){
-            int flag;
-            MPI_Status status;
-            MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-            if (flag){
-                checkMessage(status);
-            }
-        }
 
-        visit(current);
-        numOperations++;
+    while (askForWork != rank) {
+	    while (!s.empty()) {
+		edge current = s.front();
+		s.pop_front();
+		if(current.from == -1){
+		    // reset graph variables
+		    g->reset();
+		    root = current.to;
+		}
+
+		visit(current);
+		numOperations++;
+
+		if ((numOperations % CHECK_MSG_AMOUNT)==0){
+		    int flag;
+		    MPI_Status status;
+		    MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+		    if (flag){
+		        checkMessage(status);
+                        if(isFinished) break 2;
+		    }
+		}
+	    }
+            waitForWork();
+	    
     }
+
+
 
     // uz nema praci
     if (rank == 0)
     {
+	MPI_Status status;
+        char w = 'W';
+        cout << "Main process has finished working, waiting for white token" << endl;
+        do {
         // posle bileho peska
-        // ceka a kontroluje prichozi zpravy
-        // pokud prijde bily pesek, ukonci vypocet
-        // pokud prijde cerny pesek, posle znovu bileho peska
+		MPI_Send (&w, 1, MPI_CHAR, ((rank+1) % numProcessors), MSG_TOKEN, MPI_COMM_WORLD);
+		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+		if (flag){
+		    checkMessage(status);
+		}
+        } while (token != 'W' || isFinished);
+
+        cout << "Main process received white token, waiting for results" << endl;
 
         // procesor 0 ceka na odpovedi vsech procesoru
+	for (int i = 1; i < numProcessors; i++)
+        {
+	    MPI_Send (NULL, 0, MPI_CHAR, i, MSG_FINISH, MPI_COMM_WORLD);
+        }
         for (int i = 1; i < numProcessors; i++)
         {
+	    int w;
+	    MPI_Recv(&w, 1, MPI_INT, status.MPI_SOURCE, MSG_TOKEN, MPI_COMM_WORLD, &status);
+            cout << "Main process received result " << w << endl;
             // prijme ypravu s nejlepsi cestou procesoru i
             // porovna se svou nejlepsi kruznici
             // pokud je dosla kruznice vetsi nez dosud nejlepsi, prepis
@@ -96,7 +121,7 @@ void MaxHamilton::max() {
         // pokud ma procesor peska, posle ho (rank+1 % numProcessors) procesoru
         if (token != 'N')
         {
-            MPI_Isend (&token, 1, MPI_INT, ((rank+1) % numProcessors), MSG_TOKEN, MPI_COMM_WORLD, &request);
+            MPI_Isend (&token, 1, MPI_CHAR, ((rank+1) % numProcessors), MSG_TOKEN, MPI_COMM_WORLD, &request);
         }
         // ceka a kontroluje prichozi zpravy
     }
@@ -118,10 +143,18 @@ void MaxHamilton::max() {
 }
 void MaxHamilton::waitForWork(){
     int flag;
-    MPI_Status status;
-    MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-    if (flag)
-    {
+    cout << "Processor " << rank << " asking " << askForWork << " for work" << endl;
+    MPI_Send (NULL, 0, MPI_CHAR, askForWork, MSG_WORK_REQUEST, MPI_COMM_WORLD);
+    int w;
+    MPI_Recv(&w, 1, MPI_INT, status.MPI_SOURCE, MSG_TOKEN, MPI_COMM_WORLD, &status);
+    while (status.MPI_TAG != MSG_WORK_SENT && status.MPI_TAG !=MSG_WORK_NOWORK){
+      checkMessage(status);
+      if(status.MPI_TAG == MSG_FINISH) return;
+    }
+    //MPI_Status status;
+    //MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+    //if (flag)
+    //{
       //prisla zprava, je treba ji obslouzit
       //v promenne status je tag (status.MPI_TAG), cislo odesilatele (status.MPI_SOURCE)
       //a pripadne cislo chyby (status.MPI_ERROR)
@@ -129,23 +162,25 @@ void MaxHamilton::waitForWork(){
       {
          case MSG_WORK_SENT : // prisel rozdeleny zasobnik, prijmout
                               // deserializovat a spustit vypocet
-
+                              
                               color = 'B';
                               break;
          case MSG_WORK_NOWORK : // odmitnuti zadosti o praci
                                 // zkusit jiny proces
                                 // a nebo se prepnout do pasivniho stavu a cekat na token
-                                askToWork++;
+                                askForWork = (askForWork + 1) % numProcessors;
                                 break;
       }
-      checkMessage(status);
-    }
+    //}
 
 }
 void MaxHamilton::checkMessage(MPI_Status status){
       //prisla zprava, je treba ji obslouzit
       //v promenne status je tag (status.MPI_TAG), cislo odesilatele (status.MPI_SOURCE)
       //a pripadne cislo chyby (status.MPI_ERROR)
+      char t;
+      MPI_Recv(&t, 1, MPI_CHAR, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
+	cout << "Process " << rank << " received message " << status.MPI_TAG << ": '" << t << "'" << endl;
       switch (status.MPI_TAG)
       {
          case MSG_WORK_REQUEST : {// zadost o praci, prijmout a dopovedet
@@ -154,12 +189,16 @@ void MaxHamilton::checkMessage(MPI_Status status){
 		                         work* w = getSharableWork();
 		                         if (w == NULL)
 		                         {
-		                            MPI_Isend (NULL, 0, MPI_INT, (status.MPI_SOURCE % numProcessors) , MSG_WORK_NOWORK, MPI_COMM_WORLD, &request);
+	cout << "Process " << rank << " sending no work message to " << status.MPI_SOURCE << endl;
+                                             
+		                            MPI_Isend (NULL, 0, MPI_INT, status.MPI_SOURCE , MSG_WORK_NOWORK, MPI_COMM_WORLD, &request);
 		                         }
 		                         else
 		                         {
+	cout << "Process " << rank << " sending work to " << status.MPI_SOURCE << endl;
 					    int msg = 5;
-		                            MPI_Isend (&msg, 1, MPI_INT, (status.MPI_SOURCE % numProcessors), MSG_WORK_SENT, MPI_COMM_WORLD, &request);
+		                            MPI_Isend (&msg, 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &request);
+					    color = 'B';
 		                         }
                                  }
 break;
@@ -169,21 +208,19 @@ break;
                           // - bily nebo cerny v zavislosti na stavu procesu
                           if (rank == 0)
                           {
-                              char t;
-                              MPI_Recv(&t, 1, MPI_INT, status.MPI_SOURCE, MSG_TOKEN, MPI_COMM_WORLD, &status);
                               if (t == 'W') // pesek je bily
                               {
                                   for (int i = 1; i < numProcessors; i++)
                                   {
                                       // posli ypravu s MSG_FINISH vsem procesorum
-                                      MPI_Send (NULL, 0, MPI_INT, i, MSG_FINISH, MPI_COMM_WORLD);
+                                      MPI_Send (NULL, 0, MPI_CHAR, i, MSG_FINISH, MPI_COMM_WORLD);
                                   }
                               }
                               else
                               {
                                   // odesli bileho peska procesoru (1 % numProcessors)
 			          t = 'W';
-                                  MPI_Send (&t, 1, MPI_INT, (1 % numProcessors), MSG_TOKEN, MPI_COMM_WORLD);
+                                  MPI_Send (&t, 1, MPI_CHAR, (1 % numProcessors), MSG_TOKEN, MPI_COMM_WORLD);
                               }
                           }
                           if (color == 'B')
@@ -205,16 +242,18 @@ break;
                            {
                                // posle sve nejlepsi reseni procesoru 0
                                //MPI_Send (bestPath, bestLength, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
-				MPI_Send (666, 1, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
+                                int done = 666;
+				MPI_Send (&done, 1, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
+		                   MPI_Finalize();
+		                   exit (0);
                            }
                            else
                            {
-                                // nejaky procesor nasel kruznici delky trivialni horni mezi
+                                isFinished = true;// nejaky procesor nasel kruznici delky trivialni horni mezi
+
                            }
-                           MPI_Finalize();
-                           exit (0);
                            break;
-         default : std::cout << "neznamy typ zpravy"; break;
+         default : std::cout << "neznamy typ zpravy" << endl; break;
       }
 }
 
