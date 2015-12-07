@@ -213,8 +213,12 @@ void MaxHamilton::waitForWork(){
   	int position=0;
 	cout << "Processor " << rank << " is receiving work of size " << structSize << " from " << askForWork << ": "  << endl;
         MPI_Recv(workStruct, structSize, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
-        MPI_Unpack(workStruct, structSize, &position, stack, stackSize, MPI_FLOAT, MPI_COMM_WORLD);
-        MPI_Unpack(workStruct, structSize, &position, g->prev, g->size, MPI_INT, MPI_COMM_WORLD);
+	for(int i=0; i<stackSize; i++){
+	    stack[i] = workStruct[i];
+	}
+	for(int i=0; i<g->size; i++){
+	    g->prev[i] = workStruct[i+stackSize];
+	}
 	delete [] workStruct;
         s.clear();
 	for(int i=0; i<stackSize; i+=2){
@@ -263,7 +267,13 @@ void MaxHamilton::checkMessage(MPI_Status status){
 					    int * workStruct = new int[structSize];
   				            int position=0;
 					    MPI_Isend (&(w->stackSize), 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SIZE, MPI_COMM_WORLD, &request);
-		                            cout << "Process " << rank << " sending work of size " << structSize <<" to " << status.MPI_SOURCE << endl;
+		                            cout << "Process " << rank << " sending work of size " << structSize << " to " << status.MPI_SOURCE << endl;
+						for(int i=0; i<w->stackSize; i++){
+						    workStruct[i] = w->stack[i];
+						}
+						for(int i=0; i<g->size; i++){
+						    workStruct[i+w->stackSize] = g->prev[i];
+						}
 					    //MPI_Pack(w->stack, w->stackSize, MPI_INT, workStruct, structSize, &position, MPI_COMM_WORLD);
 					    //MPI_Pack(g->prev, g->size, MPI_INT, workStruct, structSize, &position, MPI_COMM_WORLD);
 		                            MPI_Isend (workStruct, structSize, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &request);
