@@ -19,7 +19,7 @@ int MaxHamilton::neighbours(int m)
     return n;
 }
 
-void MaxHamilton::bestPathToArray(buffer){
+void MaxHamilton::bestPathToArray(int * buffer){
     int n=0;
     while(!stack.empty()){
        buffer[n] = stack.top();
