@@ -49,6 +49,7 @@ protected:
     int askForWork;
     char color;
     char token;
+    bool isFinished;
 
 public:
 

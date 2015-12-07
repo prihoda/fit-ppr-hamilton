@@ -19,7 +19,19 @@ int MaxHamilton::neighbours(int m)
     return n;
 }
 
-
+void MaxHamilton::bestPathToArray(buffer){
+    int n=0;
+    while(!stack.empty()){
+       buffer[n] = stack.top();
+       stack.pop(); 
+       n++;
+    }
+    cout << "Best path of process " << rank << ": ";
+    for(int i=0; i<n; i++){
+       cout << buffer[i] << " ";
+    }
+    cout << endl;
+}
 void MaxHamilton::max() {
 
     numOperations = 0;
@@ -83,42 +95,7 @@ void MaxHamilton::max() {
 
     color = 'W';
 
-    // uz nema praci
-    if (rank == 0)
-    {
-	MPI_Status status;
-        char w = 'W';
-        cout << "Main process has finished working, waiting for white token" << endl;
-	MPI_Send (&w, 1, MPI_CHAR, ((rank+1) % numProcessors), MSG_TOKEN, MPI_COMM_WORLD);
-
-	do {
-        // posle bileho peska
-		int flag;
-		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-		if (flag){
-		    checkMessage(status);
-		}
-        } while (token != 'W' || isFinished);
-
-        cout << "Main process received white token, waiting for results" << endl;
-
-        // procesor 0 ceka na odpovedi vsech procesoru
-	for (int i = 1; i < numProcessors; i++)
-        {
-	    MPI_Send (NULL, 0, MPI_CHAR, i, MSG_FINISH, MPI_COMM_WORLD);
-        }
-        for (int i = 1; i < numProcessors; i++)
-        {
-	    int w;
-	    MPI_Recv(&w, 1, MPI_INT, MPI_ANY_SOURCE, MSG_TOKEN, MPI_COMM_WORLD, &status);
-            cout << "Main process received result " << w << " from " << status.MPI_SOURCE << endl;
-            // prijme ypravu s nejlepsi cestou procesoru i
-            // porovna se svou nejlepsi kruznici
-            // pokud je dosla kruznice vetsi nez dosud nejlepsi, prepis
-        }
-    }
-    else
-    {
+    if (rank != 0) {
 	MPI_Status status;
 	MPI_Request request;
         // pokud ma procesor peska, posle ho (rank+1 % numProcessors) procesoru
@@ -139,19 +116,67 @@ void MaxHamilton::max() {
         // ceka a kontroluje prichozi zpravy
     }
 
+
+	MPI_Status status;
+	char w = 'W';
+	cout << "Main process has finished working, waiting for white token" << endl;
+	MPI_Send (&w, 1, MPI_CHAR, ((rank+1) % numProcessors), MSG_TOKEN, MPI_COMM_WORLD);
+
+	do {
+	// posle bileho peska
+		int flag;
+		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+		if (flag){
+		    checkMessage(status);
+		}
+	} while (token != 'W' || isFinished);
+
+	cout << "Main process received white token, waiting for results" << endl;
+
+	// procesor 0 ceka na odpovedi vsech procesoru
+	for (int i = 1; i < numProcessors; i++)
+	{
+	    MPI_Send (NULL, 0, MPI_CHAR, i, MSG_FINISH, MPI_COMM_WORLD);
+	}
+
+    int * bestPath = new int[bestLength];
+    bestPathToArray(bestPath);
+
+	for (int i = 1; i < numProcessors; i++)
+	{
+	    int length;
+	    MPI_Recv(&length, 1, MPI_INT, i, MSG_TOKEN, MPI_COMM_WORLD, &status);
+	    int * result = new int[length];
+	    MPI_Recv(result, length, MPI_INT, i, MSG_TOKEN, MPI_COMM_WORLD, &status);
+
+		cout << "Received best path of " << i << ": ";
+		for(int i=0; i<length; i++){
+		cout << result[i] << " ";
+		}
+		cout << endl;
+
+	    if(length > bestLength) {
+		bestLength = length;
+		bestPath = result;
+	    } else {
+		delete[] result;            
+		}
+	    cout << "Main process received result of length " << length << " from " << status.MPI_SOURCE << endl;
+	    // prijme ypravu s nejlepsi cestou procesoru i
+	    // porovna se svou nejlepsi kruznici
+	    // pokud je dosla kruznice vetsi nez dosud nejlepsi, prepis
+	}
+
     // done, print the longest circle
     //cout << "-----------------------------" << endl;
     //cout << "Number of stack pops: " << numOperations << endl;
     //cout << "-----------------------------" << endl;
     cout << "Process no. " << rank << " finished: Longest hamiltonian subgraph: " << endl;
 
-    if (bestPath.empty())
-        cout << "Not found.";
-
-    while (!bestPath.empty()) {
-        cout << bestPath.top() << " ";
-        bestPath.pop();
+    for(int i=0; i<bestLength; i++){
+       cout << bestPath[i] << " ";
     }
+    delete [] bestPath;
     cout << endl;
 }
 void MaxHamilton::waitForWork(){
@@ -178,6 +203,7 @@ void MaxHamilton::waitForWork(){
     }
 
 }
+
 void MaxHamilton::checkMessage(MPI_Status status){
       //prisla zprava, je treba ji obslouzit
       //v promenne status je tag (status.MPI_TAG), cislo odesilatele (status.MPI_SOURCE)
@@ -225,9 +251,12 @@ break;
                            {
                                // posle sve nejlepsi reseni procesoru 0
                                //MPI_Send (bestPath, bestLength, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
-                                int done = 666;
+                                int * bestPath = new int[bestLength];
+    				bestPathToArray(bestPath);
                                 cout << "Process " << rank << " was told to finish, sending " << done << endl;
-				MPI_Send (&done, 1, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
+				MPI_Send (&bestLength, 1, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
+				MPI_Send (bestPath, bestLength, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
+				delete [] bestPath;
 		                   MPI_Finalize();
 		                   exit (0);
                            }
