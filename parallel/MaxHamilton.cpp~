@@ -196,14 +196,14 @@ void MaxHamilton::waitForWork(){
 
     if(stackSize == 0) {
         MPI_Recv(&w, 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
-        cout << "Processor " << rank << " received no work from " << askForWork << endl;
+        cout << "Process " << rank << " received no work from " << askForWork << endl;
         askForWork = (askForWork + 1) % numProcessors;
     } else {
         int structSize = stackSize + g->size;
         int * stack = new int[stackSize];
         int * workStruct = new int[structSize];
         int position=0;
-        cout << "Processor " << rank << " is receiving work of size " << structSize << " from " << askForWork << ": "  << endl;
+        cout << "Process " << rank << " is receiving work of size " << structSize << " from " << askForWork << ": "  << endl;
         MPI_Recv(workStruct, structSize, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
         for(int i=0; i<stackSize; i++){
             stack[i] = workStruct[i];
@@ -394,16 +394,10 @@ void MaxHamilton::setBestPath(int nodeAtEnd) {
 
     char blank = ' ';
     cout << "Process " << rank << " found best possible length, sending finish message" << endl;
-    if (bestLength == g->size)
+    if (bestLength == g->size && !foundLimit)
     {
         foundLimit = true;
-        for (int i = 0; i < numProcessors; i++)
-        {
-            if (i != rank)
-            {
-                MPI_Send(&blank, 1, MPI_CHAR, i, MSG_FINISH, MPI_COMM_WORLD);
-            }
-        }
+        MPI_Send(&blank, 1, MPI_CHAR, 0, MSG_FINISH, MPI_COMM_WORLD);
     }
 
     //cout << endl;
