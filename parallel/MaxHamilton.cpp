@@ -314,6 +314,12 @@ void MaxHamilton::checkMessage(MPI_Status status){
 
 work* MaxHamilton::getSharableWork(){
    if(!s.empty() && s.back().from == -1){
+      edge firstRoot = s.back();
+      s.pop_back();
+      edge secondRoot = s.back();
+      s.push_back(firstRoot);
+      if(secondRoot.from != -1) return NULL;
+      
       work* workUnit = new work;
       int toShare = 1;//s.size()/2;
       workUnit->stackSize = toShare*2;
