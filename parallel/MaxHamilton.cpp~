@@ -90,7 +90,7 @@ void MaxHamilton::max() {
                 }
             }
 	    }
-        waitForWork();
+        if(!isFinished) waitForWork();
     }
     color = 'W';
 
