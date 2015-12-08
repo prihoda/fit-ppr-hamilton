@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
     delete graph;
 
     end = clock();
-    cout << "Time required for execution: " << endl << processors << "\t" << (double)(end-start)/CLOCKS_PER_SEC << "\tseconds." << "\n\n";
+    cout << "Time required for execution: " << processors << "\t" << (double)(end-start)/CLOCKS_PER_SEC << "\tseconds" << "\n\n";
     MPI_Finalize();
 
     return 0;
