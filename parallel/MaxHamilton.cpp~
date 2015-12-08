@@ -23,7 +23,7 @@ void MaxHamilton::bestPathToArray(int * buffer){
     int n=0;
     while(!bestPath.empty()){
        buffer[n] = bestPath.top();
-       bestPath.pop(); 
+       bestPath.pop();
        n++;
     }
     cout << "Best path of process " << rank << ": ";
@@ -45,17 +45,17 @@ void MaxHamilton::max() {
     while (!bestPath.empty())
         bestPath.pop();
 
-    // start at each node
-    cout << "Process no. " << rank << " starting from nodes { ";
-    for(int i=0; i<g->size; i++) {
-       // if(i%numProcessors != rank) continue;
-       if(rank != 1) continue;
+        // start at each node
+        cout << "Process no. " << rank << " starting from nodes { ";
+        for(int i=0; i<g->size; i++) {
+        if(i%numProcessors != rank) continue;
+       //if(rank != 1) continue;
         if (neighbours(i) > 1){//(!foundLimit) && (
             cout << i << " ";
-	// prepare first edge (beginning is marked with -1)
-	    edge rootEdge;
-	    rootEdge.from = -1;
-	    rootEdge.to = i;
+            // prepare first edge (beginning is marked with -1)
+            edge rootEdge;
+            rootEdge.from = -1;
+            rootEdge.to = i;
             s.push_front(rootEdge);
         }
     }
@@ -70,52 +70,47 @@ void MaxHamilton::max() {
     while (askForWork != rank && !isFinished) {
 	    if(!s.empty()) cout << "Process " << rank << " is starting from node " << s.front().to << endl;
 	    while (!s.empty() && !isFinished) {
-		edge current = s.front();
-		s.pop_front();
-		if(current.from == -1){
-		    // reset graph variables
-		    g->reset();
-		    root = current.to;
-		}
+            edge current = s.front();
+            s.pop_front();
+            if(current.from == -1){
+                // reset graph variables
+                g->reset();
+                root = current.to;
+            }
 
-		visit(current);
-		numOperations++;
+            visit(current);
+            numOperations++;
 
-		if ((numOperations % CHECK_MSG_AMOUNT)==0){
-		    int flag;
-		    MPI_Status status;
-		    MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-		    if (flag){
-		        checkMessage(status);
-		    }
-		}
+            if ((numOperations % CHECK_MSG_AMOUNT)==0){
+                int flag;
+                MPI_Status status;
+                MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+                if (flag){
+                    checkMessage(status);
+                }
+            }
 	    }
-            waitForWork();
-	    
+        waitForWork();
     }
-
-
     color = 'W';
 
     if (rank != 0) {
-	MPI_Status status;
-	MPI_Request request;
-        // pokud ma procesor peska, posle ho (rank+1 % numProcessors) procesoru
+        MPI_Status status;
+        MPI_Request request;
         cout << "Process " << rank << " finishing naturally" << endl;
         while(true){
-		int flag;
-		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-		if (flag){
-		    checkMessage(status);
-		}
-		if (token != 'N')
-		{
-        	    cout << "Process " << rank << " resending token " << token << endl;
-		    MPI_Isend (&token, 1, MPI_CHAR, ((rank+1) % numProcessors), MSG_TOKEN, MPI_COMM_WORLD, &request);
-		    token = 'N';
-		}
-	}
-        // ceka a kontroluje prichozi zpravy
+            int flag;
+            MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+            if (flag){
+                checkMessage(status);
+            }
+            if (token != 'N')
+            {
+                cout << "Process " << rank << " resending token " << token << endl;
+                MPI_Isend (&token, 1, MPI_CHAR, ((rank+1) % numProcessors), MSG_TOKEN, MPI_COMM_WORLD, &request);
+                token = 'N';
+            }
+        }
     }
 
 
@@ -125,7 +120,6 @@ void MaxHamilton::max() {
 	MPI_Send (&w, 1, MPI_CHAR, ((rank+1) % numProcessors), MSG_TOKEN, MPI_COMM_WORLD);
 
 	do {
-	// posle bileho peska
 		int flag;
 		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
 		if (flag){
@@ -135,7 +129,7 @@ void MaxHamilton::max() {
 
 	cout << "Main process received white token, waiting for results" << endl;
  	char blank = ' ';
-	// procesor 0 ceka na odpovedi vsech procesoru
+
 	for (int i = 1; i < numProcessors; i++)
 	{
 	    MPI_Send (&blank, 1, MPI_CHAR, i, MSG_FINISH, MPI_COMM_WORLD);
@@ -158,15 +152,12 @@ void MaxHamilton::max() {
 		cout << endl;
 
 	    if(length > bestLength) {
-		bestLength = length;
-		bestPath = result;
+            bestLength = length;
+            bestPath = result;
 	    } else {
-		delete[] result;            
+            delete[] result;
 		}
 	    cout << "Main process received result of length " << length << " from " << status.MPI_SOURCE << endl;
-	    // prijme ypravu s nejlepsi cestou procesoru i
-	    // porovna se svou nejlepsi kruznici
-	    // pokud je dosla kruznice vetsi nez dosud nejlepsi, prepis
 	}
 
     // done, print the longest circle
@@ -181,6 +172,7 @@ void MaxHamilton::max() {
     delete [] bestPath;
     cout << endl;
 }
+
 void MaxHamilton::waitForWork(){
     cout << "Processor " << rank << " asking " << askForWork << " for work, waiting..." << endl;
     char blank = ' ';
@@ -192,50 +184,50 @@ void MaxHamilton::waitForWork(){
     	int flag;
 	    MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
 	    if (flag){
-                if(status.MPI_TAG == MSG_WORK_SIZE) {
-    			MPI_Recv(&stackSize, 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SIZE, MPI_COMM_WORLD, &status);
-			continue;
-		}
-                if(status.MPI_TAG == MSG_WORK_SENT) break;
-		checkMessage(status);
+            if(status.MPI_TAG == MSG_WORK_SIZE) {
+                MPI_Recv(&stackSize, 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SIZE, MPI_COMM_WORLD, &status);
+                continue;
+            }
+            if(status.MPI_TAG == MSG_WORK_SENT) break;
+            checkMessage(status);
 	    }
     } while(true);
-    
+
 
     if(stackSize == 0) {
         MPI_Recv(&w, 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
-	cout << "Processor " << rank << " received no work from " << askForWork << endl;
+        cout << "Processor " << rank << " received no work from " << askForWork << endl;
         askForWork = (askForWork + 1) % numProcessors;
-    } else { 
-	int structSize = stackSize + g->size;
-	int * stack = new int[stackSize];
-	int * workStruct = new int[structSize];
-  	int position=0;
-	cout << "Processor " << rank << " is receiving work of size " << structSize << " from " << askForWork << ": "  << endl;
+    } else {
+        int structSize = stackSize + g->size;
+        int * stack = new int[stackSize];
+        int * workStruct = new int[structSize];
+        int position=0;
+        cout << "Processor " << rank << " is receiving work of size " << structSize << " from " << askForWork << ": "  << endl;
         MPI_Recv(workStruct, structSize, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &status);
-	for(int i=0; i<stackSize; i++){
-	    stack[i] = workStruct[i];
-	}
-	for(int i=0; i<g->size; i++){
-	    g->prev[i] = workStruct[i+stackSize];
-	}
-	delete [] workStruct;
-        s.clear();
-	for(int i=0; i<stackSize; i+=2){
-	    edge e;
-	    e.from = stack[i];
-	    e.to = stack[i+1];
-	    s.push_front(e);       
-	}
-	for(int i=0; i<stackSize; i+=2){
-	    edge e;
-	    cout << e.from << "->" << e.to << " ";
-	    e.from = stack[i];
-	    e.to = stack[i+1];
-	    s.push_front(e);       
-	}
-	cout << endl;
-	delete [] stack;
+        for(int i=0; i<stackSize; i++){
+            stack[i] = workStruct[i];
+        }
+        for(int i=0; i<g->size; i++){
+            g->prev[i] = workStruct[i+stackSize];
+        }
+        delete [] workStruct;
+            s.clear();
+        for(int i=0; i<stackSize; i+=2){
+            edge e;
+            e.from = stack[i];
+            e.to = stack[i+1];
+            s.push_front(e);
+        }
+        for(int i=0; i<stackSize; i+=2){
+            edge e;
+            cout << e.from << "->" << e.to << " ";
+            e.from = stack[i];
+            e.to = stack[i+1];
+            s.push_front(e);
+        }
+        cout << endl;
+        delete [] stack;
     }
 
 }
@@ -251,47 +243,46 @@ void MaxHamilton::checkMessage(MPI_Status status){
       {
          case MSG_WORK_REQUEST : {// zadost o praci, prijmout a dopovedet
 		                         // zaslat rozdeleny zasobnik a nebo odmitnuti MSG_WORK_NOWORK
-					MPI_Request request;
+                                 MPI_Request request;
 		                         work* w = getSharableWork();
-					 
+
 		                         if (w == NULL)
 		                         {
-	cout << "Process " << rank << " sending no work message to " << status.MPI_SOURCE << endl;
-					    int zero = 0;
+                                    cout << "Process " << rank << " sending no work message to " << status.MPI_SOURCE << endl;
+                                    int zero = 0;
  		                            MPI_Isend (&zero, 1, MPI_INT, status.MPI_SOURCE , MSG_WORK_SENT, MPI_COMM_WORLD, &request);
 		                         }
 		                         else
 		                         {
-						
-					    int structSize = w->stackSize + g->size;
-					    int * workStruct = new int[structSize];
-  				            int position=0;
-					    MPI_Isend (&(w->stackSize), 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SIZE, MPI_COMM_WORLD, &request);
-		                            cout << "Process " << rank << " sending work of size " << structSize << " to " << status.MPI_SOURCE << endl;
-						for(int i=0; i<w->stackSize; i++){
-						    workStruct[i] = w->stack[i];
-						}
-						for(int i=0; i<g->size; i++){
-						    workStruct[i+w->stackSize] = g->prev[i];
-						}
-					    //MPI_Pack(w->stack, w->stackSize, MPI_INT, workStruct, structSize, &position, MPI_COMM_WORLD);
-					    //MPI_Pack(g->prev, g->size, MPI_INT, workStruct, structSize, &position, MPI_COMM_WORLD);
-		                            MPI_Isend (workStruct, structSize, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &request);
-					    delete [] workStruct;
-					    color = 'B';
+                                    int structSize = w->stackSize + g->size;
+                                    int * workStruct = new int[structSize];
+                                    int position=0;
+                                    MPI_Isend (&(w->stackSize), 1, MPI_INT, status.MPI_SOURCE, MSG_WORK_SIZE, MPI_COMM_WORLD, &request);
+                                    cout << "Process " << rank << " sending work of size " << structSize << " to " << status.MPI_SOURCE << endl;
+                                    for(int i=0; i<w->stackSize; i++){
+                                        workStruct[i] = w->stack[i];
+                                    }
+                                    for(int i=0; i<g->size; i++){
+                                        workStruct[i+w->stackSize] = g->prev[i];
+                                    }
+                                    //MPI_Pack(w->stack, w->stackSize, MPI_INT, workStruct, structSize, &position, MPI_COMM_WORLD);
+                                    //MPI_Pack(g->prev, g->size, MPI_INT, workStruct, structSize, &position, MPI_COMM_WORLD);
+                                    MPI_Isend (workStruct, structSize, MPI_INT, status.MPI_SOURCE, MSG_WORK_SENT, MPI_COMM_WORLD, &request);
+                                    delete [] workStruct;
+                                    color = 'B';
 		                         }
-					delete w;
-                                 }
-break;
+                                 delete w;
+                            }
+                            break;
          case MSG_TOKEN : //ukoncovaci token, prijmout a nasledne preposlat
                           // - bily nebo cerny v zavislosti na stavu procesu
                           token = t;
                           if (color == 'B') token = 'B';
                           if (rank == 0 && token == 'B'){
-				char w = 'W';
-				token = 'N';
-				MPI_Send (&w, 1, MPI_CHAR, ((rank+1) % numProcessors), MSG_TOKEN, MPI_COMM_WORLD);
-			  }
+                             char w = 'W';
+                             token = 'N';
+                             MPI_Send (&w, 1, MPI_CHAR, ((rank+1) % numProcessors), MSG_TOKEN, MPI_COMM_WORLD);
+                          }
                           break;
          case MSG_FINISH : //konec vypoctu - proces 0 pomoci tokenu zjistil, ze jiz nikdo nema praci
                            //a rozeslal zpravu ukoncujici vypocet
@@ -303,21 +294,20 @@ break;
                                // posle sve nejlepsi reseni procesoru 0
                                //MPI_Send (bestPath, bestLength, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
                                 int * bestPath = new int[bestLength];
-    				bestPathToArray(bestPath);
+                                bestPathToArray(bestPath);
                                 cout << "Process " << rank << " was told to finish, sending path of length " << bestLength << endl;
-				MPI_Send (&bestLength, 1, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
-				MPI_Send (bestPath, bestLength, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
-				delete [] bestPath;
-		                   MPI_Finalize();
-		                   exit (0);
+                                MPI_Send (&bestLength, 1, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
+                                MPI_Send (bestPath, bestLength, MPI_INT, 0, MSG_TOKEN, MPI_COMM_WORLD);
+                                delete [] bestPath;
+                                MPI_Finalize();
+                                exit (0);
                            }
                            else
                            {
                                 isFinished = true;// nejaky procesor nasel kruznici delky trivialni horni mezi
-
                            }
                            break;
-         default : std::cout << "neznamy typ zpravy" << endl; break;
+         default : std::cout << "Neznamy typ zpravy" << endl; break;
       }
 }
 
@@ -338,6 +328,7 @@ work* MaxHamilton::getSharableWork(){
 
    return NULL;
 }
+
 void MaxHamilton::visit(edge currentEdge) {
 
     // update the current path (just connect the current edge to the existing path)
@@ -401,9 +392,18 @@ void MaxHamilton::setBestPath(int nodeAtEnd) {
         current = g->prev[current];
     }
 
+    char blank = ' ';
+    cout << "Process " << rank << " found best possible length, sending finish message" << endl;
     if (bestLength == g->size)
     {
         foundLimit = true;
+        for (int i = 0; i < numProcessors; i++)
+        {
+            if (i != rank)
+            {
+                MPI_Send(&blank, 1, MPI_CHAR, i, MSG_FINISH, MPI_COMM_WORLD);
+            }
+        }
     }
 
     //cout << endl;
@@ -413,7 +413,7 @@ MaxHamilton::MaxHamilton(Graph *graph, int numProcessors, int rank) {
     g = graph;
     this->numProcessors = numProcessors;
     this->rank = rank;
-    
+
 }
 
 

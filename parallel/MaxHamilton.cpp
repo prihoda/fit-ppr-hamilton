@@ -392,16 +392,12 @@ void MaxHamilton::setBestPath(int nodeAtEnd) {
         current = g->prev[current];
     }
 
+    char blank = ' ';
+    cout << "Process " << rank << " found best possible length, sending finish message" << endl;
     if (bestLength == g->size)
     {
         foundLimit = true;
-        for (int i = 0; i < numProcessors; i++)
-        {
-            if (i != rank)
-            {
-                MPI_Send(&blank, 1, MPI_CHAR, i, MSG_FINISH, MPI_COMM_WORLD);
-            }
-        }
+        MPI_Send(&blank, 1, MPI_CHAR, 0, MSG_FINISH, MPI_COMM_WORLD);
     }
 
     //cout << endl;
