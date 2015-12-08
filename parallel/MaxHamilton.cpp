@@ -174,7 +174,7 @@ void MaxHamilton::max() {
 }
 
 void MaxHamilton::waitForWork(){
-    cout << "Processor " << rank << " asking " << askForWork << " for work, waiting..." << endl;
+    cout << "Process " << rank << " asking " << askForWork << " for work, waiting..." << endl;
     char blank = ' ';
     MPI_Send (&blank, 1, MPI_CHAR, askForWork, MSG_WORK_REQUEST, MPI_COMM_WORLD);
     int w = -1;
