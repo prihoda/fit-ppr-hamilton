@@ -66,26 +66,26 @@ void MaxHamilton::visit(edge currentEdge) {
     // update the current path (just connect the current edge to the existing path)
     g->prev[currentEdge.to] = currentEdge.from;
 
-    cout << " Visiting " << currentEdge.from << "->" << currentEdge.to;
-    cout << ", path: ";
-    g->printPath(currentEdge.to);
+    //cout << " Visiting " << currentEdge.from << "->" << currentEdge.to;
+    //cout << ", path: ";
+    //g->printPath(currentEdge.to);
 
     // loop through all neighbors
     for (int next = g->size - 1; next >= 0; next--) {
         if (!g->adjacent[currentEdge.to][next]) continue;
-        cout << "   Opening " << next << ": ";
+        //cout << "   Opening " << next << ": ";
 
         // came back to root in more than two steps
         if (next == root && g->prev[currentEdge.to] != root) {
-            cout << "Found cycle: ";
-            g->printPath(currentEdge.to);
+            //cout << "Found cycle: ";
+            //g->printPath(currentEdge.to);
             setBestPath(currentEdge.to);
             continue;
         }
 
         // an already visited neighbor
         if (g->isOnPath(currentEdge.to, next)) {
-            cout << "Already visited " << endl;
+            //cout << "Already visited " << endl;
             continue;
         }
 
@@ -93,7 +93,7 @@ void MaxHamilton::visit(edge currentEdge) {
         edge nextEdge;
         nextEdge.from = currentEdge.to;
         nextEdge.to = next;
-        cout << "Adding " << nextEdge.from << "->" << nextEdge.to << endl;
+        //cout << "Adding " << nextEdge.from << "->" << nextEdge.to << endl;
         s.push(nextEdge);
     }
 }
