@@ -68,12 +68,12 @@ void MaxHamilton::max() {
     // keep removing edges from stack
 
     while (askForWork != rank && !isFinished) {
-	    if(!s.empty()) cout << "Process " << rank << " is starting from node " << s.front().to << endl;
 	    while (!s.empty() && !isFinished) {
             edge current = s.front();
             s.pop_front();
             if(current.from == -1){
                 // reset graph variables
+	        cout << "Process " << rank << " is starting from root " << current.to << endl;
                 g->reset();
                 root = current.to;
             }

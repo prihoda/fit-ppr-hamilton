@@ -68,12 +68,12 @@ void MaxHamilton::max() {
     // keep removing edges from stack
 
     while (askForWork != rank && !isFinished) {
-	    if(!s.empty()) cout << "Process " << rank << " is starting from node " << s.front().to << endl;
 	    while (!s.empty() && !isFinished) {
             edge current = s.front();
             s.pop_front();
             if(current.from == -1){
                 // reset graph variables
+	        cout << "Process " << rank << " is starting from root " << current.from << endl;
                 g->reset();
                 root = current.to;
             }
@@ -318,7 +318,7 @@ work* MaxHamilton::getSharableWork(){
       s.pop_back();
       edge secondRoot = s.back();
       s.push_back(firstRoot);
-      if(secondRoot.from != -1) return NULL:
+      if(secondRoot.from != -1) return NULL;
       
       work* workUnit = new work;
       int toShare = 1;//s.size()/2;
