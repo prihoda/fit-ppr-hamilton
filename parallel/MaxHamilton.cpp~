@@ -304,6 +304,7 @@ void MaxHamilton::checkMessage(MPI_Status status){
                            }
                            else
                            {
+                                cout << "Main process was told to finish" << endl;
                                 isFinished = true;// nejaky procesor nasel kruznici delky trivialni horni mezi
                            }
                            break;
